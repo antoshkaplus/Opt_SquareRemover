@@ -1,0 +1,21 @@
+
+
+everything should be divided on "standard" pieces:
+
+        o
+o, oo, oo 
+
+if piece is too big it's divided on max "standard" pieces
+that contain every 1 square of the group
+
+every piece  
+
+
+counter force to not allow move from 3 pack elements
+
+
+State {
+    Board board;
+    Seed colorSeed
+    Moves moves;
+}
