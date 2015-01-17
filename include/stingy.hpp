@@ -12,7 +12,7 @@
 #include <set>
 #include <fstream>
 
-#include "base.h"
+#include "base.hpp"
 
 namespace square_remover {
 
@@ -32,15 +32,15 @@ namespace square_remover {
         
         void outputEqualityBoard(ostream& output) {
             output << "right" << endl;
-            for (auto r : irange((int)board_size_)) {
-                for (auto c : irange((int)board_size_)) {
+            for (auto r = 0; r < board_size_; ++r) {
+                for (auto c = 0; c < board_size_; ++c) {
                     output << char(right_color_equality_(r, c) + '0');
                 } 
                 output << endl;
             }
             output << "bottom" << endl;
-            for (auto r : irange((int)board_size_)) {
-                for (auto c : irange((int)board_size_)) {
+            for (auto r = 0; r < board_size_; ++r) {
+                for (auto c = 0; c < board_size_; ++c) {
                     output << char(bottom_color_equality_(r, c) + '0');
                 } 
                 output << endl;

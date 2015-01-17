@@ -1,0 +1,9 @@
+try to code area combination finding function
+that is also kind of template based on size of area
+
+also try to optimize by computing most frequent sequences.
+
+probably some kind of code generator is important
+
+like create everything that should be computed for each sequence
+output to some kind of file and rearrange... 

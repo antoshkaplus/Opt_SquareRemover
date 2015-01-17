@@ -8,34 +8,35 @@
 
 #include <iostream>
 
-#include "wide.h"
-#include "four_move.h"
-#include "balance.h"
-#include "stingy.h"
+#include "board.hpp"
+#include "board_test.hpp"
+#include "beam_search.hpp"
+#include "board_simulation.hpp"
+#include "combinations.hpp"
 
 using namespace std;
 using namespace ant;
 
-struct SquareRemover : square_remover::Solver {
-    vector<int> playIt(int colors, vector<string> board, int startingSeed) {
-        vector<int> moves;
-        moves = sr.playIt(colors, board, startingSeed);
-        return moves;
-    }
-    
-    Count removedCount() override {
-        return sr.removedCount();
-    }
-    
-    square_remover::Wide sr; 
-};
+//struct SquareRemover : square_remover::Solver {
+//    vector<int> playIt(int colors, vector<string> board, int startingSeed) {
+//        vector<int> moves;
+//        moves = sr.playIt(colors, board, startingSeed);
+//        return moves;
+//    }
+//    
+//    Count removedCount() override {
+//        return sr.removedCount();
+//    }
+//    
+//    square_remover::Wide sr; 
+//};
 
-void random_input(Count board_size, Count color_count, vector<string>& board, Count& seed) {
+void random_input(Count board_size, Count color_count, vector<string>& board, size_t& seed) {
     //srand((uint)time(nullptr));
     board.resize(board_size);
-    for (auto r : irange((int)board_size)) {
+    for (auto r = 0; r < board_size; ++r) {
         string s;
-        for (auto c: irange((int)board_size)) {
+        for (auto c = 0; c < board_size; ++c) {
             s.push_back(rand()%color_count+'0');
         }
         board[r] = s;
@@ -43,13 +44,27 @@ void random_input(Count board_size, Count color_count, vector<string>& board, Co
     seed = rand();
 }
 
+vector<string> GenerateStrBoard(Count sz, Count colors) {
+    vector<string> b(sz);
+    for (int r = 0; r < sz; ++r) {
+        b[r].resize(sz);
+        for (int c = 0; c < sz; ++c) {
+            b[r][c] = rand()%colors + '0';
+        }
+    }
+    return b;
+}
+
+
+
+
 void test_input(size_t& colorCount, vector<string>& board, size_t& startingSeed) {
     colorCount = 6;
     size_t board_size = 16;
     board.resize(board_size);
-    for (auto r : ant::irange(board_size)) {
+    for (auto r = 0; r < board_size; ++r) {
         string s;
-        for (auto c: ant::irange(board_size)) {
+        for (auto c = 0; c <board_size; ++c) {
             s.push_back(rand()%colorCount+'0');
         }
         board[r] = s;
@@ -65,15 +80,21 @@ void outer_input(size_t& colorCount, vector<string>& board, size_t& startingSeed
     cin >> boardSize;
     
     board.resize(boardSize);
-    for (auto i : ant::irange(boardSize)) {
+    for (auto i = 0; i < boardSize; ++i) {
         cin >> board[i];
     }
     
     cin >> startingSeed;
 }
 
+
+namespace sr = square_remover; 
+
 int main(int argc, const char * argv[])
 {
+//    sr::BoardTest bt;
+//    bt.Test();
+
     size_t colorCount;
     vector<string> board;
     size_t startSeed;
@@ -84,13 +105,22 @@ int main(int argc, const char * argv[])
     Count color_count;
     Count test_count;
     bool is_special = false;
-    SquareRemover sr;
+  //  SquareRemover sr;
     
     if (argc == 1) {
         test_input(colorCount, board, startSeed);
-        vector<int> ret;
-        ret = sr.playIt((int)colorCount, board, (int)startSeed);
-        cout << "finished" << endl;
+        const int SZ = 12;
+        const int COLORS = 5;
+        const int SEED = 5;
+        const int MOVE_COUNT = 10000;
+        auto str_b = GenerateStrBoard(SZ, COLORS);
+        sr::Board<SZ> b(str_b, COLORS, SEED);
+        sr::BeamSearch<sr::Board<SZ>> s;
+        auto res = s.Remove(b, MOVE_COUNT, 1000);
+        for (auto m : res.move_history()) {
+            cout << m.p_0.row << " " << m.p_0.col << " " << (m.IsHorizontal() ? 1 : 2) << " ";
+        }
+        //cout << t.size();
     }
     else {
         for (int i = 1; i < argc; i+=2) {
@@ -114,61 +144,61 @@ int main(int argc, const char * argv[])
                 }
             }
         }
-        if (is_outer) {
-            outer_input(colorCount, board, startSeed);
-            vector<int> ret;
-            ret = sr.playIt((int)colorCount, board, (int)startSeed);
-            assert(ret.size() == 30000);
-            for (auto i : ant::irange(30000)) {
-                cout << ret[i] << endl;
-            }
-            cout.flush();
-        }
-        else {
-            if (is_special) {
-                ofstream lol("score.txt");
-                double score = 0;
-                for (Count board_size = 8; board_size <= 16; ++board_size) {
-                    cout << "start board size " << board_size << endl << endl;
-                    for (Count color_count = 4; color_count <= 6; ++color_count) {
-                        cout << "start color count " << color_count << endl << endl;
-                        for (double d_p = 0.; d_p <= 1.; d_p+=0.1) {
-                            for (double d_b = 0.; d_b <= 1.; d_b+=0.1) {
-                                cout << "d_p: " << d_p << " d_b: " << d_b << endl;
-                                //sr.sr.balance_coeff = d;
-                                score = 0;
-                                for (Count n = 0; n < 30; ++n) {
-                                    random_input(board_size, color_count, board, starting_seed);
-                                    sr.sr.board_balance_coeff = d_b;
-                                    sr.sr.pos_balance_coeff = d_p;
-                                    sr.playIt((int)color_count, board, (uint)starting_seed);
-                                    score += sr.sr.removedCount();
-                                }
-                                score /= 30.;
-                                lol << board_size << " " << color_count 
-                                    << " " << "d_p: " << d_p << " d_b: " << d_b  
-                                    << " score: " << score << endl;
-                                lol.flush();
-                            }
-                        }
-                    }
-                }
-            
-            } else {
-                cout << "inner test begins" << endl
-                << "test count: " << test_count << endl
-                << "board size: " << board_size << endl
-                << "color count: " << color_count << endl;
-                
-                size_t result = 0;
-                for (uint i = 0; i < test_count; ++i) {
-                    random_input(board_size, color_count, board, starting_seed);
-                    sr.playIt(color_count, board, starting_seed);
-                    result += sr.removedCount();
-                }
-                cout << result/test_count << endl;
-            }
-        }
+//        if (is_outer) {
+//            outer_input(colorCount, board, startSeed);
+//            vector<int> ret;
+//            ret = sr.playIt((int)colorCount, board, (int)startSeed);
+//            assert(ret.size() == 30000);
+//            for (auto i = 0; i < 30000; ++i) {
+//                cout << ret[i] << endl;
+//            }
+//            cout.flush();
+//        }
+//        else {
+//            if (is_special) {
+//                ofstream lol("score.txt");
+//                double score = 0;
+//                for (Count board_size = 8; board_size <= 16; ++board_size) {
+//                    cout << "start board size " << board_size << endl << endl;
+//                    for (Count color_count = 4; color_count <= 6; ++color_count) {
+//                        cout << "start color count " << color_count << endl << endl;
+//                        for (double d_p = 0.; d_p <= 1.; d_p+=0.1) {
+//                            for (double d_b = 0.; d_b <= 1.; d_b+=0.1) {
+//                                cout << "d_p: " << d_p << " d_b: " << d_b << endl;
+//                                //sr.sr.balance_coeff = d;
+//                                score = 0;
+//                                for (Count n = 0; n < 30; ++n) {
+//                                    random_input(board_size, color_count, board, starting_seed);
+//                                    sr.sr.board_balance_coeff = d_b;
+//                                    sr.sr.pos_balance_coeff = d_p;
+//                                    sr.playIt((int)color_count, board, (uint)starting_seed);
+//                                    score += sr.sr.removedCount();
+//                                }
+//                                score /= 30.;
+//                                lol << board_size << " " << color_count 
+//                                    << " " << "d_p: " << d_p << " d_b: " << d_b  
+//                                    << " score: " << score << endl;
+//                                lol.flush();
+//                            }
+//                        }
+//                    }
+//                }
+//            
+//            } else {
+//                cout << "inner test begins" << endl
+//                << "test count: " << test_count << endl
+//                << "board size: " << board_size << endl
+//                << "color count: " << color_count << endl;
+//                
+//                size_t result = 0;
+//                for (uint i = 0; i < test_count; ++i) {
+//                    random_input(board_size, color_count, board, starting_seed);
+//                    sr.playIt(color_count, board, starting_seed);
+//                    result += sr.removedCount();
+//                }
+//                cout << result/test_count << endl;
+//            }
+//        }
     }
     return 0;
 }

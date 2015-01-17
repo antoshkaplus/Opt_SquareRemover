@@ -1,3 +1,10 @@
+# 4 - 6 colors
+# 8 - 16 board size
+board is probably squared
+
+questions:
+how to evaluate board?
+what matters?
 
 
 everything should be divided on "standard" pieces:

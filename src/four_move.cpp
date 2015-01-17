@@ -6,4 +6,4 @@
 //  Copyright (c) 2014 Anton Logunov. All rights reserved.
 //
 
-#include "four_move.h"
+#include "four_move.hpp"
