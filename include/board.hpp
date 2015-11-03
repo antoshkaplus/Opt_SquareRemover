@@ -169,12 +169,15 @@ class Board {
     OriginGrid<Grid<char>> colors_;
     
     //Grid<char> colors_;
+    
+    // should be another class like hashed board or something like that
     Grid<shared_ptr<Node<Location>>> board_hashes_;
     unordered_set<Location> existing_hashes_;
     shared_ptr<Node<Move>> move_history_;
     
     int seed_;
     char color_count_;    
+    // wtf is that????
     Count squares_removed_{0};
 
 public:

@@ -1,24 +1,67 @@
-# cmake -DCMAKE_BUILD_TYPE=Debug
-# cmake -DCMAKE_BUILD_TYPE=Release
+#
+# test is actually depends on google test
+#
 
-cmake_minimum_required(VERSION 2.8)
+# macros
+macro(create_source_groups curdir)
+    file(GLOB children RELATIVE ${PROJECT_SOURCE_DIR}/${curdir} ${PROJECT_SOURCE_DIR}/${curdir}/*)
+    foreach(child ${children})
+    if(IS_DIRECTORY ${PROJECT_SOURCE_DIR}/${curdir}/${child})
+        create_source_groups(${curdir}/${child})
+    else()
+        string(REPLACE "/" "\\" groupname ${curdir})
+        source_group(${groupname} FILES ${PROJECT_SOURCE_DIR}/${curdir}/${child})
+    endif()
+    endforeach()
+endmacro()
+
+# body
+cmake_minimum_required (VERSION 2.8.11)
 project (SquareRemover)
 
-list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
+list(APPEND CMAKE_CXX_FLAGS "-std=c++1y")
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -d -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Wall -g")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -Wall -O3")
 
-file(GLOB SOURCE_FILES "./src/*.cpp")
-file(GLOB HEADER_FILES "./include/*.hpp")
 
-include_directories("./include")
+set(BinDir ${PROJECT_SOURCE_DIR}/bin)
+set(LibDir ${PROJECT_SOURCE_DIR}/lib)
+
+# archive is for static libraries
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BinDir} )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LibDir} )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${LibDir} )
+foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+    string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+    set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BinDir} )
+    set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${LibDir} )
+    set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${LibDir} )
+endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+
 
 include_directories("/usr/local/include")
 include_directories("/usr/include")
+include_directories("./include")
 
 find_library(ANT_LIBRARY ant)
+if (NOT ANT_LIBRARY)
+    message(FATAL_ERROR "ant library not found")
+endif()
 
-add_executable(SquareRemover ${SOURCE_FILES} ${HEADER_FILES})
+# names of executables should be caps
 
-target_link_libraries(SquareRemover ${ANT_LIBRARY})
+file(GLOB SQUARE_REMOVER_FILES "./src/*" "./include/*")
+add_library(square_remover ${SQUARE_REMOVER_FILES})
+target_link_libraries(square_remover ${ANT_LIBRARY})
+
+add_executable(square_remover_app "./app/app.cpp")
+target_link_libraries(square_remover_app square_remover)
+
+find_library(GTEST_LIB gtest)
+if (NOT GTEST_LIB)
+    message(FATAL_ERROR "gtest library not found")
+endif()
+
+add_executable(path_defence_test "./app/test.cpp")
+target_link_libraries(path_defence_test square_remover ${GTEST_LIB} )

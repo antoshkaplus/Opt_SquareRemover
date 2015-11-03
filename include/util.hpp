@@ -11,8 +11,6 @@
 
 #include "ant/grid.h"
 
-namespace square_remover {
-
 
 using namespace std;
 using namespace ant;
@@ -68,8 +66,6 @@ const char kDown   = 1;
 //};
 //
 
-    
-
-}
+   
 
 #endif

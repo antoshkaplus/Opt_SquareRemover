@@ -3,6 +3,7 @@
 import os
 import sys
 
+# that looks like bullshit
 execFileLocation = ("/Users/antoshkaplus/Documents"
                     "/Programming/Contests/TopCoder"
                     "/SquareRemover/DerivedData/SquareRemover"

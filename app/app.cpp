@@ -13,6 +13,8 @@
 #include "beam_search.hpp"
 #include "board_simulation.hpp"
 #include "combinations.hpp"
+#include "board_naive.hpp"
+#include "local_square_remover.hpp"
 
 using namespace std;
 using namespace ant;
