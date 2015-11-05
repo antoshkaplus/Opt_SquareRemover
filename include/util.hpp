@@ -9,7 +9,7 @@
 #ifndef SquareRemover_util_hpp
 #define SquareRemover_util_hpp
 
-#include "ant/grid.h"
+#include "ant/grid.hpp"
 
 
 using namespace std;
@@ -17,8 +17,8 @@ using namespace ant;
 using namespace ant::grid;
     
 using Color = int8_t;
-using Direction = int8_t;
 
+// using predefined constants
 constexpr int NextSeed(int current_seed) {
     return ((int64_t)current_seed * 48271) % 2147483647; 
 }
@@ -41,30 +41,22 @@ constexpr int ReplaceColors(Grid& board, char color_count, Position p, int curre
     return current_seed;
 }
 
-using Rectangle = Region;
+constexpr array<Position, 4> SquarePositions(const Position p) {
+    return {{ {p.row, p.col}, {p.row, p.col+1}, 
+        {p.row+1, p.col}, {p.row+1, p.col+1} }};
+}
 
-const char kRight  = 0;
-const char kDown   = 1;
+struct Move {
+    Position pos;
+    Direction dir;
+    
+    Position another() const {
+        return pos.Shifted(dir);
+    }
+};
 
 
 
-
-
-//
-//struct Move {
-//    Position pos;
-//    Direction dir;
-//    Move() {}
-//    Move(int row, int col, Direction direction) 
-//        : Move(Position(row, col), direction) {}
-//    Move(const Position& position, Direction direction) 
-//        : pos(position), dir(direction) {}
-//        
-//    Position target() const {
-//        return dir == kRight ? pos.shifted(1, 0) : pos.shifted(0, 1);
-//    }
-//};
-//
 
    
 

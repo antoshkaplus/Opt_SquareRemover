@@ -16,8 +16,8 @@
 #include <queue>
 #include <unordered_set>
 
-#include "ant/core.h"
-#include "ant/grid.h"
+#include "ant/core/core.hpp"
+#include "ant/grid.hpp"
 
 #include "util.hpp"
 
