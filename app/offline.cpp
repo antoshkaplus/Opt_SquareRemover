@@ -1,10 +1,3 @@
-//
-//  main.cpp
-//  SquareRemover
-//
-//  Created by Anton Logunov on 4/9/14.
-//  Copyright (c) 2014 Anton Logunov. All rights reserved.
-//
 
 #include <iostream>
 #include <fstream>
@@ -20,13 +13,12 @@
 using namespace std;
 using namespace ant;
 
-ofstream online_input("../output/online_input.txt");
+ifstream online_input("../output/online_input.txt");
 
 
 int main(int argc, const char * argv[])
 {
-    auto pr = ReadProblem(cin);
-    WriteProblem(online_input, pr);
+    auto pr = ReadProblem(online_input);
     
     auto sz = pr.board.size();
     Grid<Color> g;
@@ -41,23 +33,4 @@ int main(int argc, const char * argv[])
     
     NaiveSquareRemover naive;
     auto moves = naive.Solve(b, kMoveCount);
-    
-    WriteSolution(cout, moves);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

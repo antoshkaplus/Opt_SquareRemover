@@ -58,10 +58,14 @@ target_link_libraries(square_remover ${ANT_LIBRARY})
 add_executable(square_remover_app "./app/app.cpp")
 target_link_libraries(square_remover_app square_remover)
 
+add_executable(offline "./app/offline.cpp")
+target_link_libraries(offline square_remover)
+
+
 find_library(GTEST_LIB gtest)
 if (NOT GTEST_LIB)
     message(FATAL_ERROR "gtest library not found")
 endif()
 
-add_executable(path_defence_test "./app/test.cpp")
-target_link_libraries(path_defence_test square_remover ${GTEST_LIB} )
+add_executable(test "./app/test.cpp")
+target_link_libraries(test square_remover ${GTEST_LIB} )

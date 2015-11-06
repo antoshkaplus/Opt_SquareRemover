@@ -16,7 +16,16 @@ using namespace std;
 using namespace ant;
 using namespace ant::grid;
     
+    
 using Color = int8_t;
+
+constexpr Count kColorMin = 4;
+constexpr Count kColorMax = 6;
+constexpr Count kSizeMin = 8;
+constexpr Count kSizeMax = 16;
+constexpr Count kMoveCount = 10000;
+
+extern default_random_engine RNG;
 
 // using predefined constants
 constexpr int NextSeed(int current_seed) {
@@ -50,11 +59,26 @@ struct Move {
     Position pos;
     Direction dir;
     
+    Move() {}
+    Move(Position& p, Direction d)
+        : pos(p), dir(d) {}
+    
+    
     Position another() const {
         return pos.Shifted(dir);
     }
 };
 
+
+struct Problem {
+    int color_count;
+    int starting_seed;
+    vector<string> board;
+};
+
+Problem ReadProblem(istream& cin);
+void WriteProblem(ostream& out, const Problem& pr);
+void WriteSolution(ostream& out, vector<Move>& moves);
 
 
 

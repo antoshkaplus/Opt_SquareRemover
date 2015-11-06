@@ -16,8 +16,8 @@
 namespace square_remover {
     
 struct Simulation {
-    unordered_set<Location> removed_hashes;
-    vector<Location> new_hashes;
+//    unordered_set<Location> removed_hashes;
+//    vector<Location> new_hashes;
 };
 
 struct BoardSimulation {

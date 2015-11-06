@@ -11,15 +11,15 @@
 #include "local_sq_rm.hpp"
 
 class NaiveSquareRemover {
-
+public:
     vector<Move> Solve(Board& b, Count move_count) {
         vector<Move> res;
         for (Index i = 0; i < move_count; ++i) {
+            
             vector<Move> best_ms;
-            Count best_sq_rm;
-        
-            auto sq_rm = b.squares_removed();
+            Count best_sq_rm = -1;
             Board new_b; 
+            
             LocalSquareRemover local;
             local.Init(new_b);
             for (auto& m : b.moves()) {
@@ -35,18 +35,14 @@ class NaiveSquareRemover {
                 }
             }
             
-            b.MakeMove(best_ms[0]);
-            local.Remove(best_ms[0]);
-            res.push_back(best_ms[0]);
+            uniform_int_distribution<> distr(0, best_ms.size()-1);
+            Index k = distr(RNG);
+            b.MakeMove(best_ms[k]);
+            res.push_back(best_ms[k]);
+            if (best_sq_rm != 0) {
+                local.Remove(best_ms[k]);
+            }
         }
-        
-        
-        // for number of moves available 
-        // find all remove moves
-        // take random of them and execute
-        // once nothing found go with random move
-        
-        
         return res;
     }
 

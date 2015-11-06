@@ -16,10 +16,14 @@ class Board {
 public:
     
     Board() {}
-    Board(Grid<Color>& board, Count color_count, Index seed)
-        :  seed_(seed), color_count_(color_count), board_(board) {}
+    Board(Grid<Color>& board, Count color_count, Index seed) {
+        Init(board, color_count, seed);
+    }
     
     void Init(Grid<Color>& board, Count color_count, Index seed) {
+        board_ = board;
+        color_count_ = color_count;
+        seed_ = seed;
         
         Region reg{{0, 0}, board.size()};
         for (Position p : reg) {
