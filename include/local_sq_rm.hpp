@@ -17,32 +17,9 @@ public:
         board_ = &board;
     }
     
-    // vs big rectangle
-    
-    // i have to sort other way around... or get problems while popping elements
-    
-    // possible points of removal
-    void Remove(vector<Position>& ps) {
-        auto& b = *board_;
-        while (!ps.empty()) {
-            auto p = ps.back();
-            ps.pop_back();
-            if (b.IsSquare(p)) {
-                b.Remove(p);
-               
-                auto sq = SquarePositions(p);
-                // also include nearby positions here!
-                
-                // need to implement algorithm going back one by one
-                // can set be a good solution??? probably not
-                ps.insert(ps.end(), sq.begin(), sq.end()); 
-            }
-        }
-    }
-    
     void Remove(const Move& m) {
-        auto rm = AffectedPositions(m);
-        Remove(rm);
+        AffectedPositions(m, affected_positions_);
+        Remove(affected_positions_);
     }
     
     Count squares_removed() const {
@@ -51,21 +28,60 @@ public:
     
 private:
 
-    vector<Position> AffectedPositions(Move m) {
+    void Remove(vector<Position>& ps) {
         auto& b = *board_;
-        Indent t{1, 1};
-        Size sz{3, 3};
-        Region b_reg{{0, 0}, b.grid().size()};
-        Region r{m.pos - t, sz};
-        Region r_2{m.another() - t, sz};
-        r = r.intersection(b_reg);
-        r_2 = r_2.intersection(b_reg);
-        Position p = min(r.position, r_2.position, Position::TopLeftComparator());
-        Position p_2 = max(r.position + static_cast<Indent>(r.size), r_2.position + static_cast<Indent>(r_2.size), Position::TopLeftComparator());
-        Region reg{p, static_cast<Size>(p_2-p)};
-        return vector<Position>(reg.begin(), reg.end());
+        while (!ps.empty()) {
+            auto p = ps.back();
+            ps.pop_back();
+            if (b.IsSquare(p)) {
+                b.Remove(p);
+                AddAffectedBySquare(p, ps);
+            }
+        }
+    }
+
+    void AddAffectedBySquare(const Position& sq, vector<Position>& ps) {
+        auto sz = ps.size();
+        auto reg = AffectedRegionBySquare(sq);
+        ps.reserve(sz + reg.cell_count());
+        ps.insert(ps.end(), reg.begin(), reg.end());
+        reverse(ps.begin() + sz, ps.end());
+        inplace_merge(ps.begin(), ps.begin()+sz, ps.end(), Position::BottomRightComparator());
+        unique(ps.begin(), ps.end());
+    }
+
+    vector<Position> AffectedPositions(Move m) {
+        vector<Position> res;
+        AffectedPositions(m, res);
+        return res;
+    }
+    
+    void AffectedPositions(const Move& m, vector<Position>& ps) {
+        Region reg = AffectedRegion(m);
+        ps.reserve(reg.cell_count());
+        auto func = [&](const Position& p) {
+            ps.push_back(p);
+        };
+        reg.ForEach(func);
+        reverse(ps.begin(), ps.end());
+    }
+    
+    Region AffectedRegionBySquare(const Position& sq) {
+        auto& b = *board_;
+        auto aff_reg = Region(sq - Indent{1, 1}, Size{3, 3});
+        return b.region().intersection(aff_reg);
+    }
+    
+    Region AffectedRegion(const Move& m) {
+        auto ind = Indent{1,1};
+        auto p = m.pos - ind;
+        if (p.row < 0) p.row = 0;
+        if (p.col < 0) p.col = 0; 
+        return {p, m.another()}; 
     }
     
     Board* board_;
     Count squares_removed_;
+    // buffer
+    vector<Position> affected_positions_;
 };

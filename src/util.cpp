@@ -46,4 +46,13 @@ void WriteSolution(ostream& out, vector<Move>& moves) {
     }
 }
 
-
+Grid<Color> ToColorGrid(const vector<string>& b) {
+    Grid<Color> g;
+    auto sz = b.size();
+    g.resize(sz, sz);
+    auto func = [&](const Position& p) {
+        return g[p] = b[p.row][p.col] - '0';
+    };
+    g.ForEachPosition(func);
+    return g;
+}

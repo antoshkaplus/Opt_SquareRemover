@@ -17,7 +17,7 @@ using namespace ant;
 using namespace ant::grid;
     
     
-using Color = int8_t;
+using Color = short;
 
 constexpr Count kColorMin = 4;
 constexpr Count kColorMax = 6;
@@ -60,7 +60,7 @@ struct Move {
     Direction dir;
     
     Move() {}
-    Move(Position& p, Direction d)
+    Move(const Position& p, Direction d)
         : pos(p), dir(d) {}
     
     
@@ -80,8 +80,7 @@ Problem ReadProblem(istream& cin);
 void WriteProblem(ostream& out, const Problem& pr);
 void WriteSolution(ostream& out, vector<Move>& moves);
 
-
-
+Grid<Color> ToColorGrid(const vector<string>& b);
    
 
 #endif

@@ -3,7 +3,6 @@
 #include <fstream>
 
 #include "board.hpp"
-#include "beam_search.hpp"
 #include "board_simulation.hpp"
 #include "combinations.hpp"
 #include "board.hpp"

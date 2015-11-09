@@ -16,22 +16,24 @@ class Board {
 public:
     
     Board() {}
-    Board(Grid<Color>& board, Count color_count, Index seed) {
+    Board(const Grid<Color>& board, Count color_count, Index seed) {
         Init(board, color_count, seed);
     }
     
-    void Init(Grid<Color>& board, Count color_count, Index seed) {
+    void Init(const Grid<Color>& board, Count color_count, Index seed) {
         board_ = board;
         color_count_ = color_count;
         seed_ = seed;
+        squares_removed_ = 0;
+        moves_.reset(new vector<Move>());
         
         Region reg{{0, 0}, board.size()};
         for (Position p : reg) {
             if (p.col < size()-1) {
-                moves_.emplace_back(p, kDirRight);
+                moves_->emplace_back(p, kDirRight);
             }
             if (p.row < size()-1) {
-                moves_.emplace_back(p, kDirDown);
+                moves_->emplace_back(p, kDirDown);
             }
         }
     }
@@ -56,8 +58,12 @@ public:
         return board_;
     }
     
+    const Region region() const {
+         return Region(0, 0, size(), size());
+    }
+    
     const vector<::Move>& moves() const {
-        return moves_;
+        return *moves_;
     }
     
     Count squares_removed() const {
@@ -81,5 +87,5 @@ private:
     Count color_count_;
     Count squares_removed_;    
     Grid<Color> board_;
-    vector<::Move> moves_;
+    shared_ptr<vector<::Move>> moves_;
 };
