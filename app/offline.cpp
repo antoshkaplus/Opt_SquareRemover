@@ -8,6 +8,8 @@
 #include "board.hpp"
 #include "local_sq_rm.hpp"
 #include "naive.hpp"
+#include "greedy.hpp"
+//#include "beam_search.hpp"
 
 using namespace std;
 using namespace ant;
@@ -30,6 +32,6 @@ int main(int argc, const char * argv[])
     Board b;
     b.Init(g, pr.color_count, pr.starting_seed);
     
-    NaiveSquareRemover naive;
+    Greedy naive;
     auto moves = naive.Solve(b, kMoveCount);
 }

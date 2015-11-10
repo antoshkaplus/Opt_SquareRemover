@@ -54,6 +54,24 @@ public:
         swap(board_[m.pos], board_[pos_2]);
     }
     
+    bool IsIdentityMove(const Move& m) {
+        return color(m.pos) == color(m.another());
+    }
+    
+    bool IsKillerMove(const Move& m) {
+        MakeMove(m);
+        Position p_0 = m.pos - Indent{1,1};
+        Position p_1 = m.pos - Indent{1,0};
+        Position p_2 = m.another() - Indent{0,1};
+        Position p_3 = m.another();
+        bool res = false;
+        if (IsSquare(p_0) || IsSquare(p_1) || IsSquare(p_2) || IsSquare(p_3)) {
+            res = true;
+        }
+        MakeMove(m);
+        return res;
+    }
+    
     const Grid<Color>& grid() const {
         return board_;
     }
@@ -82,10 +100,85 @@ public:
         return board_.size().row;
     }
     
+    Count color_count() const {
+        return color_count_;
+    }
+    
 private:        
     Index seed_;
     Count color_count_;
     Count squares_removed_;    
     Grid<Color> board_;
+    // this one should not be stored here
+    // ore may be computed everytime
     shared_ptr<vector<::Move>> moves_;
 };
+
+class ScoreCalculator {
+public:
+
+    void Init(const Board& b) {
+        board_ = &b;
+        open_.resize(b.size(), b.size());
+    }
+
+    // more is better
+    double Compute() {
+        fill(open_.begin(), open_.end(), true);
+        Count triples = CountTriples();
+        Count doubles = CountDoubles();
+        return board_->squares_removed() + 0.0026 * (70.*triples + 17.*doubles);
+    }
+    
+private:
+    
+    Count CountTriples() {
+        auto& b = *board_;
+        auto& g = b.grid();
+    
+        Count triples = 0;
+        auto func = [&](const Position& p) {
+            if (!open_(p)) return;
+            Indent i_1{-1,0};
+            Indent i_2{ 0,1};
+            for (auto i = 0; i < 4; ++i) {
+                // can use current p_2
+                Position p_1 = p + i_1;
+                Position p_2 = p + i_2;
+                if (g.IsInside(p_1) && g.IsInside(p_2) &&
+                    open_(p_1) && open_(p_2) &&
+                    g(p) == g(p_1) && g(p) == g(p_2)) {
+                    
+                    ++triples;
+                    open_(p) = open_(p_1) = open_(p_2) = false;
+                }
+                tie(i_1, i_2) = make_tuple(i_2, i_1*=-1);
+            }
+        };
+        g.ForEachPosition(func);
+        return triples;
+    }
+    
+    Count CountDoubles() {
+        auto& b = *board_;
+        auto& g = b.grid();
+        
+        Count doubles = 0;
+        // try to go down and right
+        auto func = [&](const Position& p) {
+            if (!open_(p)) return;
+            for (auto d : {kDirRight, kDirDown}) {
+                auto pp = p.Shifted(d);
+                if (g.isInside(pp) && open_(pp) && g(p) == g(pp)) {
+                    ++doubles; 
+                }
+            }
+        };
+        g.ForEachPosition(func);
+        return doubles;
+    }
+
+    const Board* board_;
+    Grid<char> open_;
+};
+

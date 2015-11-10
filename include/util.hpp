@@ -80,7 +80,6 @@ Problem ReadProblem(istream& cin);
 void WriteProblem(ostream& out, const Problem& pr);
 void WriteSolution(ostream& out, vector<Move>& moves);
 
-Grid<Color> ToColorGrid(const vector<string>& b);
-   
+Grid<Color> ToColorGrid(const vector<string>& b);   
 
 #endif

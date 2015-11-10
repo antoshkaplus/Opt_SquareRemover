@@ -10,12 +10,13 @@
 #include <fstream>
 
 #include "board.hpp"
-#include "beam_search.hpp"
+//#include "beam_search.hpp"
 #include "board_simulation.hpp"
 #include "combinations.hpp"
 #include "board.hpp"
 #include "local_sq_rm.hpp"
 #include "naive.hpp"
+#include "greedy.hpp"
 
 using namespace std;
 using namespace ant;
@@ -39,7 +40,7 @@ int main(int argc, const char * argv[])
     Board b;
     b.Init(g, pr.color_count, pr.starting_seed);
     
-    NaiveSquareRemover naive;
+    Greedy naive;
     auto moves = naive.Solve(b, kMoveCount);
     
     WriteSolution(cout, moves);
