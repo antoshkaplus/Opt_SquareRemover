@@ -72,6 +72,8 @@ public:
         return res;
     }
     
+    bool IsTriple()
+    
     const Grid<Color>& grid() const {
         return board_;
     }
@@ -164,6 +166,75 @@ private:
     HashFunction::value hash_;
     shared_ptr<HashFunction> hash_function_;
     
+};
+
+
+
+class CalculatedBoard : public Board {
+public:
+    void MakeMove(const Move& m) {
+        assert(color(m.pos) != color(m.another()));
+            
+        
+        Board::MakeMove(m);
+    }
+    
+    Count CountTriples(const Position& p) {
+        Count c = 0;
+        Position p_1, p_2;
+        auto& g = grid(); 
+        // where p is located
+        // left
+        p_1 = p.Shifted(kDirLeft);
+        
+        p_2 = p_1.Shifted(kDirUp);
+        if (g.IsInside(p_2) && ) 
+        
+        // check them 
+        
+        auto p_2 = p_1.Shifted(kDirDown);
+        
+        // right
+        auto p_1 = p.Shifted(kDirRight);
+        
+        auto p_2 = p_1.Shifted(kDirUp);
+        auto p_2 = p_1.Shifted(kDirDown);
+        
+        
+        // top 
+        auto p_1 = p.Shifted(kDirUp);
+        
+        auto p_2 = p_1.Shifted(kDirLeft);
+        auto p_2 = p_1.Shifted(kDirRight);
+        
+        
+        // down 
+        auto p_1 = p.Shifted(kDirDown);
+        
+        auto p_2 = p_1.Shifted(kDirLeft);
+        auto p_2 = p_1.Shifted(kDirRight);
+        
+        // middle up
+        auto p_1 = p.Shifted(kDirUp);
+        
+        auto p_2 = p.Shifted(kDirLeft);
+        auto p_2 = p.Shifted(kDirRight);
+        
+        // middle down
+        auto p_1 = p.Shifted(kDirDown);
+        
+        auto p_2 = p.Shifted(kDirLeft);
+        auto p_2 = p.Shifted(kDirRight);
+    
+        
+    }
+    
+    
+    
+private:
+    
+    Count double_count;
+    Count triple_count;
 };
 
 

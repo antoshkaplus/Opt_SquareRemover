@@ -3,7 +3,7 @@
 
 beam search is not good because order matters. and we never get duplicates.
 beam search may be good if find right function to define when to "shrink wellness".
-right collapsing should help to avoid no solution situation. very bad boards. 
+right collapsing should help to avoid no solution situation. very bad boards.
 
 
 
@@ -41,3 +41,6 @@ probably some kind of code generator is important
 
 like create everything that should be computed for each sequence
 output to some kind of file and rearrange...
+
+
+# having board size bigger than normal is awesome idea to not check for bounds
