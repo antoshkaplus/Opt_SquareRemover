@@ -15,13 +15,15 @@ class Greedy {
     using HashFunction = ZobristHashing<64>;
 
 public:
-    vector<Move> Solve(Board& b, Count move_count) {
+    vector<Move> Solve(Board& b_in, Count move_count) {
         vector<Move> res;
+        HashedBoard b;
+        b.Init(b_in.grid(), b_in.color_count(), b_in.seed());
+        
         // reuse object. less allocations
         Board new_b; 
         LocalSquareRemover local;
         ScoreCalculator score_calc;
-        HashFunction zobrist_hashing({b.size(), b.size()}, b.color_count());
         // now it should inside board... to keep hash
         unordered_set<HashFunction::value> visited;
         
@@ -49,12 +51,31 @@ public:
                 }
             }
             
-            uniform_int_distribution<> distr(0, best_ms.size()-1);
-            Index k = distr(RNG);
-            b.MakeMove(best_ms[k]);
-            res.push_back(best_ms[k]);
+            Move m;
+            Index iteration = 0;
+            for (;;) {
+                uniform_int_distribution<> distr(0, best_ms.size()-1);
+                Index k = distr(RNG);
+                b.MakeMove(best_ms[k]);
+                if (best_sq_rm > 1 || visited.count(b.hash()) == 0) {
+                    m = best_ms[k];
+                    break;
+                }
+                b.MakeMove(best_ms[k]);
+                if (++iteration == 10) {
+                    uniform_int_distribution<> distr(0, b.moves().size()-1);
+                    for (;;) {
+                        m = b.moves()[distr(RNG)];
+                        if (b.IsIdentityMove(m)) continue;
+                        b.MakeMove(m);
+                        break;
+                    }
+                }
+            }
+            visited.insert(b.hash());
+            res.push_back(m);
             local.Init(b);
-            local.Remove(best_ms[k]);
+            local.Remove(m);
         }
         return res;
     }
