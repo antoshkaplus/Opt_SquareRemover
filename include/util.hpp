@@ -82,4 +82,9 @@ void WriteSolution(ostream& out, vector<Move>& moves);
 
 Grid<Color> ToColorGrid(const vector<string>& b);   
 
+
+
+
+
+
 #endif
