@@ -19,7 +19,7 @@ endmacro()
 cmake_minimum_required (VERSION 2.8.11)
 project (SquareRemover)
 
-list(APPEND CMAKE_CXX_FLAGS "-std=c++1y")
+list(APPEND CMAKE_CXX_FLAGS "-std=c++1y -Wno-sign-compare -Wno-char-subscripts")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Wall -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -Wall -O3")
@@ -61,11 +61,16 @@ target_link_libraries(square_remover_app square_remover)
 add_executable(offline "./app/offline.cpp")
 target_link_libraries(offline square_remover)
 
+add_executable(v_1 "submit/v_1.cpp" "app/main_template.cpp")
+target_link_libraries(v_1 square_remover)
+
+add_executable(nika others/nika.cpp app/main_template.cpp)
+target_link_libraries(nika square_remover)
 
 find_library(GTEST_LIB gtest)
 if (NOT GTEST_LIB)
     message(FATAL_ERROR "gtest library not found")
 endif()
 
-add_executable(test "./app/test.cpp")
-target_link_libraries(test square_remover ${GTEST_LIB} )
+add_executable(tester "./app/tester.cpp")
+target_link_libraries(tester square_remover ${GTEST_LIB} )

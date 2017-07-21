@@ -17,7 +17,7 @@
 #include <unordered_set>
 
 #include "ant/core/core.hpp"
-#include "ant/grid.hpp"
+#include "ant/grid/grid.hpp"
 
 #include "util.hpp"
 

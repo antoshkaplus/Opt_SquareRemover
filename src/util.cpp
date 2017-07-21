@@ -37,7 +37,7 @@ void WriteProblem(ostream& out, const Problem& pr) {
 }
 
 
-void WriteSolution(ostream& out, vector<Move>& moves) {
+void WriteSolution(ostream& out, const vector<Move>& moves) {
     map<Direction, int> ds = {{kDirUp, 0}, {kDirRight, 1}, {kDirDown, 2}, {kDirLeft, 3}};
     for (auto m : moves) {
         out << m.pos.row << endl;
@@ -45,6 +45,7 @@ void WriteSolution(ostream& out, vector<Move>& moves) {
         out << ds[m.dir] << endl; 
     }
 }
+
 
 Grid<Color> ToColorGrid(const vector<string>& b) {
     Grid<Color> g;

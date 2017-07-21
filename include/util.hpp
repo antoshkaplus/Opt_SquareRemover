@@ -1,16 +1,6 @@
-//
-//  util.hpp
-//  SquareRemover
-//
-//  Created by Anton Logunov on 1/11/15.
-//
-//
+#pragma once
 
-#ifndef SquareRemover_util_hpp
-#define SquareRemover_util_hpp
-
-#include "ant/grid.hpp"
-
+#include "ant/grid/grid.hpp"
 
 using namespace std;
 using namespace ant;
@@ -82,9 +72,3 @@ void WriteSolution(ostream& out, vector<Move>& moves);
 
 Grid<Color> ToColorGrid(const vector<string>& b);   
 
-
-
-
-
-
-#endif

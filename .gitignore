@@ -3,5 +3,7 @@ build*
 .idea
 .DS_Store
 lib
-bin
+bin/
 output
+scores/
+cmake-build-*/
