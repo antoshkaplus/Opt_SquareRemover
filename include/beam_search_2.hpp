@@ -16,7 +16,7 @@
 
 namespace square_remover {
     
-
+// same files. this one is template though.
 template<class Board>
 struct BeamSearch {
     

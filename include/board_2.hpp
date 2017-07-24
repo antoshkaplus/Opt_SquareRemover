@@ -24,7 +24,8 @@
 
 namespace square_remover {
     
-// could use Position actually
+// could use Position actually, but this takes less memory
+// used to perfectly identify 4 move.
 struct  Location {
     char row;
     char col; 
@@ -56,6 +57,7 @@ namespace square_remover {
 using namespace ant::opt;
 
 
+// ?
 //   
 // 0 : top, right, top 
 // 1 : top, right, right 
@@ -159,7 +161,7 @@ constexpr bool IsSquare(const Grid& g, const Position& p) {
 }
 
 
-// should be template that depends on size
+// should be template that depends on size. ??? why ???
 template<Count BOARD_SIZE>
 class Board {
     
@@ -179,7 +181,8 @@ class Board {
 
 public:
     Board() {}
-    
+
+    // TODO watchout for existing squares
     Board(vector<string> board, int color_count, int starting_seed) {
         colors_.grid().resize(BOARD_SIZE + 4, BOARD_SIZE + 4);
         colors_.set_origin({-2, -2});
@@ -206,6 +209,7 @@ public:
     // shared ptr may chancge
     vector<Board> OneMoveDerivatives() const {
         VerifyHashIdentity();
+        // could just make all copies of b, then for each hash/board call remove
         vector<Board> res(existing_hashes_.size());
         Board b;
         int i = 0;
@@ -327,7 +331,9 @@ private:
         UpdateOneMoves(update_one_moves);
         VerifyHashIdentity();
     }
-    
+
+    // what's going on ???
+    // getting rid of some combinations cuz of square removal
     void RemoveLocation(Location loc) {
         array<Position, 4> ps = OneMovePositions(loc);
         for (auto p : ps) {
@@ -345,6 +351,7 @@ private:
     void AddLocation(char r, char c, char combo) {
         Location h{r, c, combo};
         // already there
+        // could just check bool from insert. works quicker
         if (existing_hashes_.count(h) == 1) return;
         existing_hashes_.insert(h);
         for (auto& p : OneMovePositions(h)) {
@@ -425,10 +432,6 @@ private:
                 }
             }
         }
-        
-        
-        
-        
     }
     
     // one big loop

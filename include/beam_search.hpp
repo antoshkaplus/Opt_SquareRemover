@@ -57,7 +57,8 @@ public:
         });
         return res;
     }
-    
+
+    // usually is different class
     static double Score(const Board& b) {
         return - (b.SquaresRemovedCount() + b.OneMoveCount());
     }

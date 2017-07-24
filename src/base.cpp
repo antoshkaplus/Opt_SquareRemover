@@ -9,11 +9,7 @@
 #include "base.hpp"
 
 namespace square_remover {
-//    
-//    array<Position, 4>  squarePositions(const Position& square) {
-//        Int r = square.row, c = square.col; 
-//        return {{Position(r, c), Position(r, c+1), Position(r+1, c), Position(r+1, c+1)}};
-//    }
+
 //    
 //    Direction oppositeDirection(Direction d) {
 //        return (d+2)%4;

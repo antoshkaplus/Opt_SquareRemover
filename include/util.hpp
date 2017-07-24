@@ -26,6 +26,7 @@ constexpr char NextColor(int current_seed, char color_count) {
     return current_seed % color_count;
 }
 
+// replace it with the loop around SquarePositions
 template<class Grid>
 constexpr int ReplaceColors(Grid& board, char color_count, Position p, int current_seed) {
     // top left, top right, bot left, bot right
