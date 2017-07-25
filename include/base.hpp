@@ -164,6 +164,8 @@ protected:
     }
 
 private:
+    // can't you just eliminate online?? why create this stupid vector??
+    // so stupid!!!
     vector<Position> eliminateCandidates(const Rectangle& rect) {
         vector<Position> candidates;
         for (auto r = rect.row_begin(); r < rect.row_end()-1; ++r) {
@@ -232,10 +234,12 @@ protected:
         return b_0 + b_1;
     }
 
+    // validation in case previous move affected precomputed
     bool canEliminate(const Move& m) {
         return eliminationDegree(m) > 0;
     }
 
+    // better to throw exception if different from Down, Right
     vector<Position> eliminate(const Move& m) {
         Rectangle rect;
         rect.position = m.position;
@@ -306,10 +310,9 @@ protected:
         r_end   = rect.row_end(),
         c_begin = rect.col_begin(),
         c_end   = rect.col_end();
-        Position p;
         for (auto r = r_begin; r < r_end-1; ++r) {
             for (auto c = c_begin; c < c_end-1; ++c) {
-                p.set(r, c);
+                Position p{r, c};
                 searchFourMoves(p, rect, sqs, sqs_inds);
             }
         }
@@ -331,6 +334,7 @@ protected:
             for (auto c = c_begin; c < c_end-1; ++c) {
                 p.set(r, c);
                 if (countColorInSquare(p, color) == 3) {
+                    // call will retrigger comparison procedure
                     searchFourMoves(p, rect, sqs, sqs_inds);
                 }
             }
@@ -338,6 +342,10 @@ protected:
         return sqs;
     }
 
+    // we look for for moves inside a rectangle
+    // sqs - existing moves
+    // sqs_inds - existsing indexes of those moves
+    // we guard / protect against duplicates
     virtual void searchFourMoves(const Position& position, const Rectangle& rect,
                          vector<Move>& sqs, unordered_set<Index>& sqs_inds) {
         Int r = position.row,
@@ -407,11 +415,9 @@ protected:
         }
 
         // remove repeating moves
-        Move m;
-        Index ind;
         for (Index i = sqs.size()-count; i < sqs.size();) {
-            m = sqs[i];
-            ind = m.index();
+            auto m = sqs[i];
+            auto ind = m.index();
             if (sqs_inds.count(ind)) {
                 swap(sqs[i], sqs.back());
                 sqs.pop_back();

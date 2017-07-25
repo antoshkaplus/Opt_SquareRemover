@@ -9,7 +9,7 @@
 #pragma once
 
 #include "local_sq_rm.hpp"
-
+#include "score_calc.hpp"
 
 class Greedy {
     using HashFunction = ZobristHashing<64>;
@@ -57,12 +57,14 @@ public:
                 uniform_int_distribution<> distr(0, best_ms.size()-1);
                 Index k = distr(RNG);
                 b.MakeMove(best_ms[k]);
+                // after we made blind move
                 if (best_sq_rm > 1 || visited.count(b.hash()) == 0) {
                     m = best_ms[k];
                     break;
                 }
                 b.MakeMove(best_ms[k]);
                 if (++iteration == 10) {
+                    // made move that didn't go to visited, the idea was probably to leave the main loop too
                     uniform_int_distribution<> distr(0, b.moves().size()-1);
                     for (;;) {
                         m = b.moves()[distr(RNG)];
