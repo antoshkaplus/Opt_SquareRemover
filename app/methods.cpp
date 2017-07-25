@@ -1,4 +1,6 @@
 #include "naive.hpp"
+#include "greedy.hpp"
+#include "wide.hpp"
 
 
 class SquareRemover {
@@ -16,6 +18,28 @@ std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> boar
     NaiveSquareRemover naive;
     auto moves = naive.Solve(b, kMoveCount);
     return ToSolution(moves);
+}
+
+#endif
+
+#ifdef SQR_REM_GREEDY
+
+std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
+    Grid<Color> g = ToColorGrid(board);
+    Board b;
+    b.Init(g, colors, startingSeed);
+
+    Greedy naive;
+    auto moves = naive.Solve(b, kMoveCount);
+    return ToSolution(moves);
+}
+
+#endif
+
+#ifdef SQR_REM_WIDE
+
+std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
+    return square_remover::Wide().playIt(colors, board, startingSeed);
 }
 
 #endif

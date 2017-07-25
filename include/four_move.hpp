@@ -30,15 +30,15 @@ namespace square_remover {
 
             Degree update(FourMoveSolver& solver) {
                 Count size = solver.board_size_;
-                Position p = position;
+                Position p = pos;
                 bool b_0, b_1, c_0_0 = false, c_0_1 = false, c_1_0 = false, c_1_1 = false;
                 solver.makeMove(*this);
                 degree = 0;
                 // here i want to know not only elimination degree, but eliminated squares
-                switch(direction) {
-                    case kUp:
-                        p = target();
-                    case kDown:
+                switch(dir) {
+                    case kDirUp:
+                        p = another();
+                    case kDirDown:
                         if (p.row > 0) {
                             c_0_0 = p.col > 0        && solver.isFourSquare(p + Indent{-1, -1});
                             c_0_1 = p.col < size-1   && solver.isFourSquare(p + Indent{-1,  0});
@@ -55,9 +55,9 @@ namespace square_remover {
                         else if (c_1_1) square[degree++] = p + Indent{ 1,  0};
 
                         break;
-                    case kLeft:
-                        p = target();
-                    case kRight:
+                    case kDirLeft:
+                        p = another();
+                    case kDirRight:
                         if (p.col > 0) {
                             c_0_0 = p.row > 0        && solver.isFourSquare(p + Indent{-1, -1});
                             c_0_1 = p.row < size-1   && solver.isFourSquare(p + Indent{ 0, -1});
@@ -116,9 +116,9 @@ namespace square_remover {
                     makeMove(m);
                     updateMovesAfterMove(m);
                 }
-                int_moves.push_back(m.position.row);
-                int_moves.push_back(m.position.col);
-                int_moves.push_back(m.direction);
+                int_moves.push_back(m.pos.row);
+                int_moves.push_back(m.pos.col);
+                int_moves.push_back(m.dir);
             }
             return int_moves;
         }
@@ -128,7 +128,7 @@ namespace square_remover {
             updateMoves(boardRectangle());
         }
 
-        void updateMoves(const Rectangle& rect) {
+        void updateMoves(const Region& rect) {
             // need to validate
             Index ind;
             FourMove fm;
@@ -145,20 +145,20 @@ namespace square_remover {
 
         void updateMovesAfterMove(const Move& m) {
             // first get to top left
-            Int r = m.position.row,
-                c = m.position.col;
-            Rectangle rect;
-            switch (m.direction) {
-                case kLeft:
+            Int r = m.pos.row,
+                c = m.pos.col;
+            Region rect;
+            switch (m.dir) {
+                case kDirLeft:
                     rect.set(r-2, c-3, 5, 6);
                     break;
-                case kRight:
+                case kDirRight:
                     rect.set(r-2, c-2, 5, 6);
                     break;
-                case kUp:
+                case kDirUp:
                     rect.set(r-3, c-2, 6, 5);
                     break;
-                case kDown:
+                case kDirDown:
                     rect.set(r-2, c-2, 6, 5);
                     break;
             }
@@ -166,20 +166,20 @@ namespace square_remover {
         }
 
         void updateMovesAfterEliminationMove(const Move& m, const vector<Position>& sqs) {
-            vector<Rectangle> rect_sqs;
+            vector<Region> rect_sqs;
             for (auto& s : sqs) {
-                rect_sqs.push_back(Rectangle(s.row-2, s.col-2, 6, 6));
+                rect_sqs.push_back(Region(s.row-2, s.col-2, 6, 6));
             }
             Position s;
-            s = m.position;
-            rect_sqs.push_back(Rectangle(s.row-2, s.col-2, 5, 5));
-            s = m.target();
-            rect_sqs.push_back(Rectangle(s.row-2, s.col-2, 5, 5));
+            s = m.pos;
+            rect_sqs.push_back(Region(s.row-2, s.col-2, 5, 5));
+            s = m.another();
+            rect_sqs.push_back(Region(s.row-2, s.col-2, 5, 5));
 
             // put in united rectangle
             if (rect_sqs.size()) {
                 updateMoves(boardRectangle().intersection(
-                    Rectangle::unite(rect_sqs.begin(), rect_sqs.end())));
+                    Region::unite(rect_sqs.begin(), rect_sqs.end())));
             }
         }
 
@@ -187,12 +187,12 @@ namespace square_remover {
             validate(boardRectangle());
         }
 
-        void validate(const Rectangle& rect) {
+        void validate(const Region& rect) {
             FourMove m;
             vector<Index> remove_indices;
             for (auto& p : four_moves_) {
                 m = p.second;
-                if (!rect.hasInside(m.position)) continue;
+                if (!rect.hasInside(m.pos)) continue;
                 if (m.update(*this) == 0) {
                     remove_indices.push_back(p.first);
                 }
@@ -204,11 +204,11 @@ namespace square_remover {
 
         double totalDegree() {
             Int s = 0;
-            vector<Rectangle> sqs;
+            vector<Region> sqs;
             for (auto p : four_moves_) {
                 s += p.second.degree;
                 for (int i = 0; i < p.second.degree; ++i) {
-                    sqs.push_back(squareRectangle(p.second.square[i]));
+                    sqs.push_back(Region(p.second.square[i], Size{2, 2}));
                 }
             }
             // would like also remove squares that have same moving point

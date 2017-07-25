@@ -54,6 +54,7 @@ endif()
 file(GLOB SQUARE_REMOVER_FILES "./src/*" "./include/*")
 add_library(square_remover ${SQUARE_REMOVER_FILES})
 target_link_libraries(square_remover ${ANT_LIBRARY})
+set_target_properties(square_remover PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable")
 
 add_executable(square_remover_app "./app/app.cpp")
 target_link_libraries(square_remover_app square_remover)
@@ -73,7 +74,21 @@ add_executable(naive app/methods.cpp app/main_template.cpp)
 target_link_libraries(naive square_remover)
 target_compile_definitions(naive PUBLIC -DSQR_REM_NAIVE)
 
+add_executable(greedy app/methods.cpp app/main_template.cpp)
+target_link_libraries(greedy square_remover)
+target_compile_definitions(greedy PUBLIC -DSQR_REM_GREEDY)
+
+add_executable(wide app/methods.cpp app/main_template.cpp)
+target_link_libraries(wide square_remover)
+target_compile_definitions(wide PUBLIC -DSQR_REM_WIDE)
+set_target_properties(wide PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable")
+
+
 # others
+add_executable(psyho others/psyho.cpp app/tester_template.cpp)
+target_link_libraries(psyho square_remover)
+set_target_properties(psyho PROPERTIES COMPILE_FLAGS "-Wno-unused-variable -Wno-logical-op-parentheses -Wno-return-type")
+
 add_executable(psyho_tester others/psyho.cpp app/tester_template.cpp)
 target_link_libraries(psyho_tester square_remover)
 set_target_properties(psyho_tester PROPERTIES COMPILE_FLAGS "-Wno-unused-variable -Wno-logical-op-parentheses -Wno-return-type")
@@ -81,6 +96,14 @@ set_target_properties(psyho_tester PROPERTIES COMPILE_FLAGS "-Wno-unused-variabl
 add_executable(tanzaku_tester others/tanzaku.cpp app/tester_template.cpp)
 target_link_libraries(tanzaku_tester square_remover)
 set_target_properties(tanzaku_tester PROPERTIES COMPILE_FLAGS "-Wno-logical-op-parentheses -Wno-unused-const-variable")
+
+add_executable(tanzaku others/tanzaku.cpp app/tester_template.cpp)
+target_link_libraries(tanzaku square_remover)
+set_target_properties(tanzaku PROPERTIES COMPILE_FLAGS "-Wno-logical-op-parentheses -Wno-unused-const-variable")
+
+add_executable(wrong others/wrong.cpp app/main_template.cpp)
+target_link_libraries(wrong square_remover)
+set_target_properties(wrong PROPERTIES COMPILE_FLAGS "-Wno-logical-op-parentheses -Wno-unused-const-variable")
 
 add_executable(wrong_tester others/wrong.cpp app/tester_template.cpp)
 target_link_libraries(wrong_tester square_remover)

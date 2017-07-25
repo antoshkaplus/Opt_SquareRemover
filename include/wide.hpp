@@ -26,7 +26,7 @@ namespace square_remover {
                 eliminated_count(0),
                 four_move_degree(0),
                 position_balance(0),
-                board_balance(MAXFLOAT) {}
+                board_balance(std::numeric_limits<double>::max()) {}
             Int eliminated_count;
             double four_move_degree;
             double position_balance;
@@ -34,7 +34,7 @@ namespace square_remover {
         };
 
 
-        Wide() : balance_coeff(MAXFLOAT), pos_balance_coeff(1.), board_balance_coeff(1.) {
+        Wide() : balance_coeff(std::numeric_limits<double>::max()), pos_balance_coeff(1.), board_balance_coeff(1.) {
         }
 
         virtual vector<int> playIt(int colors, vector<string> board, int startingSeed) override;
@@ -131,10 +131,10 @@ namespace square_remover {
                     // nothing to validate only hard watch
                     ms_count = 0;
                     if (c < board_size_-1) {
-                        ms[ms_count++] = Move(r, c, kRight);
+                        ms[ms_count++] = Move(r, c, kDirRight);
                     }
                     if (r < board_size_-1) {
-                        ms[ms_count++] = Move(r, c, kDown);
+                        ms[ms_count++] = Move(r, c, kDirDown);
                     }
                     while (ms_count) {
                         m = ms[--ms_count];
@@ -158,9 +158,9 @@ namespace square_remover {
 
 
         // dont expect possible four moves here
-        vector<DoubleMove> preFourMoves(const Rectangle& rect) {
+        vector<DoubleMove> preFourMoves(const Region& rect) {
             vector<DoubleMove> pre_sqs;
-            Rectangle rect_search;
+            Region rect_search;
             Size d;
             Move m;
             bool b;
@@ -169,12 +169,12 @@ namespace square_remover {
                 for (auto c = rect.col_begin(); c < rect.col_end(); ++c) {
                     rect_search.position = {r-2, c-2};
                     if (r < board_size_-1 && color_board_(r, c) != color_board_(r+1, c)) {
-                        items[0] = make_tuple(true, Move(r, c, kDown), Size(6, 5));
+                        items[0] = make_tuple(true, Move(r, c, kDirDown), Size(6, 5));
                     }
                     else get<0>(items[0]) = false;
 
                     if (c < board_size_-1 && color_board_(r, c) != color_board_(r, c+1)) {
-                        items[1] = make_tuple(true, Move(r, c, kRight), Size(5, 6));
+                        items[1] = make_tuple(true, Move(r, c, kDirRight), Size(5, 6));
                     }
                     else get<0>(items[1]) = false;
 
@@ -201,13 +201,13 @@ namespace square_remover {
         }
 
         // need to run validation first (need to have right four_moves) or reimplement preFourMoves
-        void updateMoves(const Rectangle& rect) {
+        void updateMoves(const Region& rect) {
             FourMoveSolver::updateMoves(rect);
             validatePreFourMoves();
             updatePreFourMoves(rect);
         }
 
-        void updatePreFourMoves(const Rectangle& rect) {
+        void updatePreFourMoves(const Region& rect) {
             Index ind;
             for (auto& m : preFourMoves(rect)) {
                 ind = m.index();
@@ -219,20 +219,20 @@ namespace square_remover {
 
         void updateMovesAfterMove(const Move& m) {
             // first get to top left
-            Int r = m.position.row,
-            c = m.position.col;
-            Rectangle rect;
-            switch (m.direction) {
-                case kLeft:
+            Int r = m.pos.row,
+            c = m.pos.col;
+            Region rect;
+            switch (m.dir) {
+                case kDirLeft:
                     rect.set(r-3, c-4, 7, 8);
                     break;
-                case kRight:
+                case kDirRight:
                     rect.set(r-3, c-3, 7, 8);
                     break;
-                case kUp:
+                case kDirUp:
                     rect.set(r-4, c-3, 8, 7);
                     break;
-                case kDown:
+                case kDirDown:
                     rect.set(r-3, c-3, 8, 7);
                     break;
             }
@@ -240,20 +240,20 @@ namespace square_remover {
         }
 
         void updateMovesAfterEliminationMove(const Move& m, const vector<Position>& sqs) {
-            vector<Rectangle> rect_sqs;
+            vector<Region> rect_sqs;
             for (auto& s : sqs) {
-                rect_sqs.push_back(Rectangle(s.row-3, s.col-3, 8, 8));
+                rect_sqs.push_back(Region(s.row-3, s.col-3, 8, 8));
             }
             Position s;
-            s = m.position;
-            rect_sqs.push_back(Rectangle(s.row-3, s.col-3, 7, 7));
-            s = m.target();
-            rect_sqs.push_back(Rectangle(s.row-3, s.col-3, 7, 7));
+            s = m.pos;
+            rect_sqs.push_back(Region(s.row-3, s.col-3, 7, 7));
+            s = m.another();
+            rect_sqs.push_back(Region(s.row-3, s.col-3, 7, 7));
 
             // put in united rectangle
             if (rect_sqs.size()) {
                 updateMoves(boardRectangle().intersection(
-                    Rectangle::unite(rect_sqs.begin(), rect_sqs.end())));
+                    Region::unite(rect_sqs.begin(), rect_sqs.end())));
             }
         }
 
@@ -279,9 +279,12 @@ namespace square_remover {
         map<Index, DoubleMove> pre_four_moves_;
         unique_ptr<FourMoveSolver> four_buffer_;
         unique_ptr<Wide> wide_buffer_;
+
+        friend struct Base;
     };
 
     ostream& operator<<(ostream& output, const Wide::Stats& s);
+
 }
 
 

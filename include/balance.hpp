@@ -14,7 +14,7 @@
 
 namespace square_remover {
     
-    struct Balance : virtual Base {
+    struct Balance : Base {
 
         // low value here is bad
         double positionBalance() {
@@ -24,7 +24,7 @@ namespace square_remover {
             for (auto r = 0; r < board_size_; ++r) {
                 for (auto c = 0; c < board_size_; ++c) {
                     count = 0;
-                    Rectangle rect = boardRectangle().intersection(Rectangle(r-1, c-1, 3, 3));
+                    Region rect = boardRectangle().intersection(Region(r-1, c-1, 3, 3));
                     color = color_board_(r,c);
 //                    for (auto rr = rect.row_begin(); rr < rect.row_end(); ++rr) {
 //                        for (auto cc = rect.col_begin(); cc < rect.col_end(); ++cc) {

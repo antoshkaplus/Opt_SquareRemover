@@ -36,8 +36,8 @@ namespace square_remover {
                 no_move_count++;
                 m = bestFarMove();
                 last_move = m;
-                last_color_p = color_board_(m.position);
-                last_color_t = color_board_(m.target());
+                last_color_p = color_board_(m.pos);
+                last_color_t = color_board_(m.another());
                 makeMove(m);
                 updateMovesAfterMove(m);
             }
@@ -54,31 +54,31 @@ namespace square_remover {
                     (s_pre_f.eliminated_count + s_pre_f.four_move_degree-1 >
                      s_f.eliminated_count + s_f.four_move_degree &&
                      (pre_f.first != last_move ||
-                      last_color_p != color_board_(last_move.target()) ||
-                      last_color_t != color_board_(last_move.position)
+                      last_color_p != color_board_(last_move.another()) ||
+                      last_color_t != color_board_(last_move.pos)
                       )
                      )
-                   /* ||
-                 /*   (s_pre_f.eliminated_count + s_pre_f.four_move_degree-1 >
-                     s_f.eliminated_count + s_f.four_move_degree
-                     // bigger better
-                 /*    &&
-                     pos_balance_coeff*s_pre_f.position_balance - board_balance_coeff*s_pre_f.board_balance - balance_coeff >
-                     pos_balance_coeff*s_best.position_balance - board_balance_coeff*s_best.board_balance)*/
+//                    ||
+//                    (s_pre_f.eliminated_count + s_pre_f.four_move_degree-1 >
+//                     s_f.eliminated_count + s_f.four_move_degree
+//                     // bigger better
+//                     &&
+//                     pos_balance_coeff*s_pre_f.position_balance - board_balance_coeff*s_pre_f.board_balance - balance_coeff >
+//                     pos_balance_coeff*s_best.position_balance - board_balance_coeff*s_best.board_balance)
 
                     ) {
                         m = pre_f.first;
                         last_move = m;
-                        last_color_p = color_board_(m.position);
-                        last_color_t = color_board_(m.target());
+                        last_color_p = color_board_(m.pos);
+                        last_color_t = color_board_(m.another());
                         makeMove(m);
                         updateMovesAfterMove(m);
                 }
                 else {
                     m = f.first;
                     last_move = m;
-                    last_color_p = color_board_(m.position);
-                    last_color_t = color_board_(m.target());
+                    last_color_p = color_board_(m.pos);
+                    last_color_t = color_board_(m.another());
                     makeMove(m);
                     updateMovesAfterEliminationMove(m, eliminate(m));
 
@@ -86,9 +86,9 @@ namespace square_remover {
             }
             //assert(m.direction == kRight || m.direction == kDown);
 
-            moves.push_back(m.position.row);
-            moves.push_back(m.position.col);
-            moves.push_back(m.direction);
+            moves.push_back(m.pos.row);
+            moves.push_back(m.pos.col);
+            moves.push_back(m.dir);
 
 //            output
 //            << "it: " << i << " four: " << four_moves_.size()

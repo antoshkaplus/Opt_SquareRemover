@@ -11,6 +11,7 @@ using namespace ant::grid;
     
     
 using Color = short;
+using Seed = int;
 
 constexpr Count kColorMin = 4;
 constexpr Count kColorMax = 6;
@@ -54,9 +55,23 @@ struct Move {
     Direction dir;
     
     Move() {}
+    Move(int row, int col, Direction d) : Move({row, col}, dir) {}
     Move(const Position& p, Direction d)
         : pos(p), dir(d) {}
-    
+
+    // 2 bit per dir, 5 bits row / col (due to extended board)
+    // 12 bits total
+    int index() const {
+        return (dir << 10) | (pos.row << 5) | pos.col;
+    }
+
+    bool operator==(const Move& m) const {
+        return (pos == m.pos && dir == m.dir) || (pos == m.another() && dir == kDirOpposite[m.dir]);
+    }
+
+    bool operator!=(const Move& m) const {
+        return !(*this == m);
+    }
     
     Position another() const {
         return pos.Shifted(dir);

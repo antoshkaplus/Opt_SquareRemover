@@ -35,7 +35,7 @@ array<Position, 4>  squarePositions(const Position& square);
 Direction           oppositeDirection(Direction d);
 string              directionString(Direction d);
 Direction           randomDirection();
-Rectangle           squareRectangle(const Position& square);
+Region           squareRectangle(const Position& square);
 
 
 /* if you want more "directed" move make subclass and rewrite index */
@@ -46,7 +46,7 @@ struct DoubleMove : Move {
         : Move(m), next(next) {}
     Index index() {
         Index i = 0;
-        i = next.index() << 11 | Move::index();
+        i = next.index() << 12 | Move::index();
         return i;
     }
     Move next;
@@ -70,15 +70,19 @@ struct Base : Solver {
         for (auto i = 0; i < kMoveCount; ++i) {
             Move m = randomMove();
             makeMove(m);
-            moves.push_back(m.position.row);
-            moves.push_back(m.position.col);
-            moves.push_back(m.direction);
+            moves.push_back(m.pos.row);
+            moves.push_back(m.pos.col);
+            moves.push_back(m.dir);
             eliminate();
         }
         return moves;
     }
 
 protected:
+
+    Direction randomDirection() {
+        return rand()%kDirCount;
+    }
 
     Position randomPosition() {
         return Position(rand()%board_size_, rand()%board_size_);
@@ -88,11 +92,11 @@ protected:
         Move m;
         Position p;
         do {
-            m.position = randomPosition();
-            m.direction = randomDirection();
-            p = m.target();
+            m.pos = randomPosition();
+            m.dir = randomDirection();
+            p = m.another();
         } while(!color_board_.isInside(p) ||
-                 color_board_(p) == color_board_(m.position));
+                 color_board_(p) == color_board_(m.pos));
         return m;
     }
 
@@ -166,7 +170,7 @@ protected:
 private:
     // can't you just eliminate online?? why create this stupid vector??
     // so stupid!!!
-    vector<Position> eliminateCandidates(const Rectangle& rect) {
+    vector<Position> eliminateCandidates(const Region& rect) {
         vector<Position> candidates;
         for (auto r = rect.row_begin(); r < rect.row_end()-1; ++r) {
             for (auto c = rect.col_begin(); c < rect.col_end()-1; ++c) {
@@ -179,7 +183,7 @@ private:
 
 protected:
     // need function that receives just position
-    virtual vector<Position> eliminate(Rectangle rect) {
+    virtual vector<Position> eliminate(Region rect) {
         vector<Position> squares;
         priority_queue<Position, vector<Position>, Position::BottomRightComparator> heap;
         while(true) {
@@ -193,20 +197,20 @@ protected:
             if (isFourSquare(p)) {
                 replaceColors(p);
                 squares.push_back(p);
-                rect = boardRectangle().intersection(Rectangle(p.row-1, p.col-1, 4, 4));
+                rect = boardRectangle().intersection(Region(p.row-1, p.col-1, 4, 4));
             }
         }
         return squares;
     }
 
-    Degree eliminationDegree(const Move& m) {
-        Position p = m.position;
+    int eliminationDegree(const Move& m) {
+        Position p = m.pos;
         bool b_0, b_1;
         makeMove(m);
-        switch(m.direction) {
-            case kUp:
-                p = m.target();
-            case kDown:
+        switch(m.dir) {
+            case kDirUp:
+                p = m.another();
+            case kDirDown:
                 b_0 =
                 (p.row > 0 &&
                     ((p.col > 0               && isFourSquare(p + Indent{-1, -1})) ||
@@ -216,9 +220,9 @@ protected:
                     ((p.col > 0               && isFourSquare(p + Indent{ 1, -1})) ||
                      (p.col < board_size_-1   && isFourSquare(p + Indent{ 1,  0}))));
                 break;
-            case kLeft:
-                p = m.target();
-            case kRight:
+            case kDirLeft:
+                p = m.another();
+            case kDirRight:
                 b_0 =
                 (p.col > 0 &&
                     ((p.row > 0               && isFourSquare(p + Indent{-1, -1})) ||
@@ -238,25 +242,25 @@ protected:
     bool canEliminate(const Move& m) {
         return eliminationDegree(m) > 0;
     }
-
+public:
     // better to throw exception if different from Down, Right
     vector<Position> eliminate(const Move& m) {
-        Rectangle rect;
-        rect.position = m.position;
-        switch(m.direction) {
-        case kDown:
+        Region rect;
+        rect.position = m.pos;
+        switch(m.dir) {
+        case kDirDown:
             rect.shift(-1, -1);
             rect.size.set(4, 3);
             break;
-        case kUp:
+        case kDirUp:
             rect.shift(-2, -1);
             rect.size.set(4, 3);
             break;
-        case kRight:
+        case kDirRight:
             rect.shift(-1, -1);
             rect.size.set(3, 4);
             break;
-        case kLeft:
+        case kDirLeft:
             rect.shift(-1, -2);
             rect.size.set(3, 4);
             break;
@@ -265,6 +269,7 @@ protected:
         return eliminate(boardRectangle().intersection(rect));
     }
 
+protected:
     vector<Position> eliminate() {
         return eliminate(boardRectangle());
     }
@@ -279,12 +284,14 @@ protected:
         return Color(color_seed_ % color_count_);
     }
 
+public:
     virtual void makeMove(const Move& m) {
-        swap(color_board_(m.position), color_board_(m.target()));
+        swap(color_board_(m.pos), color_board_(m.another()));
     }
 
-    Rectangle boardRectangle() {
-        return Rectangle(0, 0, (int)board_size_, (int)board_size_);
+protected:
+    Region boardRectangle() {
+        return Region(0, 0, (int)board_size_, (int)board_size_);
     }
 
     void outputColorBoard(ostream& output) {
@@ -299,10 +306,10 @@ protected:
     /* you can use fourMoves methods where you want
        probably they belong to base class */
     vector<Move> fourMoves() {
-        return fourMoves(Rectangle(0, 0, (int)board_size_, (int)board_size_));
+        return fourMoves(Region(0, 0, (int)board_size_, (int)board_size_));
     }
 
-    vector<Move> fourMoves(const Rectangle& rect) {
+    vector<Move> fourMoves(const Region& rect) {
         vector<Move> sqs;
         unordered_set<Index> sqs_inds;
         auto
@@ -321,7 +328,7 @@ protected:
 
 
     // all four moves of special color
-    vector<Move> fourMoves(const Rectangle& rect, Color color) {
+    vector<Move> fourMoves(const Region& rect, Color color) {
         vector<Move> sqs;
         unordered_set<Index> sqs_inds;
         auto
@@ -346,7 +353,7 @@ protected:
     // sqs - existing moves
     // sqs_inds - existsing indexes of those moves
     // we guard / protect against duplicates
-    virtual void searchFourMoves(const Position& position, const Rectangle& rect,
+    virtual void searchFourMoves(const Position& position, const Region& rect,
                          vector<Move>& sqs, unordered_set<Index>& sqs_inds) {
         Int r = position.row,
         c = position.col;
@@ -369,48 +376,48 @@ protected:
             p_m = p_3+Indent{1, 0};
             if (p_3.row < rect.row_end()-1 && isSameColor(p_0, p_m)) {
                 ++count;
-                sqs.push_back(Move(p_3, kDown));
+                sqs.push_back(Move(p_3, kDirDown));
             }
             p_m = p_3+Indent{0, 1};
             if (p_3.col < rect.col_end()-1 && isSameColor(p_0, p_m)) {
                 ++count;
-                sqs.push_back(Move(p_3, kRight));
+                sqs.push_back(Move(p_3, kDirRight));
             }
         }
         if (b_0_1 && b_0_3) {
             p_m = p_2+Indent{1, 0};
             if (p_2.row < rect.row_end()-1 && isSameColor(p_0, p_m)) {
                 ++count;
-                sqs.push_back(Move(p_2, kDown));
+                sqs.push_back(Move(p_2, kDirDown));
             }
             p_m = p_2+Indent{0,-1};
             if (p_2.col > rect.col_begin() && isSameColor(p_0, p_m)) {
                 ++count;
-                sqs.push_back(Move(p_m, kRight));
+                sqs.push_back(Move(p_m, kDirRight));
             }
         }
         if (b_2_3 && b_0_3) {
             p_m = p_1+Indent{-1,0};
             if (p_1.row > rect.row_begin() && isSameColor(p_0, p_m)) {
                 ++count;
-                sqs.push_back(Move(p_m, kDown));
+                sqs.push_back(Move(p_m, kDirDown));
             }
             p_m = p_1+Indent{0, 1};
             if (p_1.col < rect.col_end()-1 && isSameColor(p_0, p_m)) {
                 ++count;
-                sqs.push_back(Move(p_1, kRight));
+                sqs.push_back(Move(p_1, kDirRight));
             }
         }
         if (b_1_2 && b_2_3) {
             p_m = p_0+Indent{-1,0};
             if (p_0.row > rect.row_begin() && isSameColor(p_1, p_m)) {
                 ++count;
-                sqs.push_back(Move(p_m, kDown));
+                sqs.push_back(Move(p_m, kDirDown));
             }
             p_m = p_0+Indent{0,-1};
             if (p_0.col > rect.col_begin() && isSameColor(p_1, p_m)) {
                 ++count;
-                sqs.push_back(Move(p_m, kRight));
+                sqs.push_back(Move(p_m, kDirRight));
             }
         }
 
