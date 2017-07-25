@@ -28,14 +28,8 @@ int main(int argc, const char * argv[])
 {
     auto pr = ReadProblem(cin);
     WriteProblem(online_input, pr);
-    
-    auto sz = pr.board.size();
-    Grid<Color> g;
-    g.resize(sz, sz);
-    auto func = [&](const Position& p) {
-        return g[p] = pr.board[p.row][p.col] - '0';
-    };
-    g.ForEachPosition(func);
+
+    Grid<Color> g = ToColorGrid(pr.board);
     
     Board b;
     b.Init(g, pr.color_count, pr.starting_seed);

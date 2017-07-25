@@ -10,6 +10,7 @@
 
 #include "board.hpp"
 
+// class responsible for removing everything in the right order after move.
 class LocalSquareRemover {
 public:
     
@@ -55,7 +56,9 @@ private:
         AffectedPositions(m, res);
         return res;
     }
-    
+
+    // we expect empty ps. why do we reverse at the end, we should check in provided order
+    // we reverse because we gonna take out from the back.. like stack. (should rename data structure then?)
     void AffectedPositions(const Move& m, vector<Position>& ps) {
         Region reg = AffectedRegion(m);
         ps.reserve(reg.cell_count());
@@ -73,6 +76,9 @@ private:
     }
     
     Region AffectedRegion(const Move& m) {
+        // more optimal to use real positions
+        // can have a boolean array that keeps track of all positions
+        // if position is already marked for visiting no need to bother for second time visit
         auto ind = Indent{1,1};
         auto p = m.pos - ind;
         if (p.row < 0) p.row = 0;

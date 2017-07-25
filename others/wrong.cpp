@@ -416,7 +416,7 @@ int params[9][3][2] = {
 {{32,30},{36,30},{40,20},}
 };
 
-class SquareRemover {
+class SquareRemover_2 {
 private:
     int colors;
     vector<string> initial_board;
@@ -606,3 +606,13 @@ public:
         return ret;
     }
 };
+
+class SquareRemover {
+public:
+    vector<int> playIt(int colors_, vector<string> board, int startSeed);
+};
+
+vector<int> SquareRemover::playIt(int colors, vector<string> board, int startSeed) {
+    SquareRemover_2 sr;
+    return sr.playIt(colors, board, startSeed);
+}

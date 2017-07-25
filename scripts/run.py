@@ -1,7 +1,18 @@
 import sys
 import os
+from optparse import OptionParser
 
-command = ("java -jar ./SquareRemoverVis.jar -exec ./../bin/square_remover_app "
-                + " ".join(sys.argv[1:] if len(sys.argv) > 1 else [""]))
+parser = OptionParser(usage="usage: %prog --version=%executable")
+parser.add_option("--version", dest="version", type="string")
+
+(options, args) = parser.parse_args()
+
+if options.version:
+    VERSION = options.version
+else:
+    parser.error("version not specified")
+
+
+command = "java -jar ./SquareRemoverVis.jar -exec ./../bin/" + VERSION
 
 os.system(command)

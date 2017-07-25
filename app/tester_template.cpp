@@ -8,14 +8,12 @@
 using namespace std;
 using namespace ant;
 
-ifstream online_input("../output/online_input.txt");
-
-
 int main(int argc, const char * argv[])
 {
-    auto pr = RandomProblem(kSizeMin, kColorMin);
+    auto pr = RandomProblem(11, 4);
 
     SquareRemover solver;
+    cerr << "started" << endl;
     auto v = solver.playIt(pr.color_count, pr.board, pr.starting_seed);
-
+    cerr << "finished" << endl;
 }

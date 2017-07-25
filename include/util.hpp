@@ -1,6 +1,9 @@
 #pragma once
 
+#include "boost/iterator/zip_iterator.hpp"
+
 #include "ant/grid/grid.hpp"
+
 
 using namespace std;
 using namespace ant;
@@ -57,6 +60,14 @@ struct Move {
     Position another() const {
         return pos.Shifted(dir);
     }
+
+    bool isVertical() const {
+        return dir == kDirUp || dir == kDirDown;
+    }
+
+    bool isHorizontal() const {
+        return dir == kDirRight || dir == kDirLeft;
+    }
 };
 
 
@@ -70,5 +81,51 @@ Problem ReadProblem(istream& cin);
 void WriteProblem(ostream& out, const Problem& pr);
 void WriteSolution(ostream& out, vector<Move>& moves);
 
-Grid<Color> ToColorGrid(const vector<string>& b);   
+inline void WriteSolution(ostream& out, vector<int>& moves) {
+    assert(moves.size() == 3*kMoveCount);
+    for (auto i : moves) {
+        ant::Println(out, i);
+    }
+}
 
+inline vector<int> ToSolution(const vector<Move>& moves) {
+    vector<int> res;
+    res.reserve(3*moves.size());
+    static const map<Direction, int> ds = {{kDirUp, 0}, {kDirRight, 1}, {kDirDown, 2}, {kDirLeft, 3}};
+    for (auto& m : moves) {
+        res.push_back(m.pos.row);
+        res.push_back(m.pos.col);
+        res.push_back(ds.at(m.dir));
+    }
+    return res;
+}
+
+Grid<Color> ToColorGrid(const vector<string>& b);
+
+inline vector<string> GenerateStrBoard(Count sz, Count colors) {
+    vector<string> b(sz);
+    for (int r = 0; r < sz; ++r) {
+        b[r].resize(sz);
+        for (int c = 0; c < sz; ++c) {
+            b[r][c] = rand()%colors + '0';
+        }
+    }
+    return b;
+}
+
+inline Problem RandomProblem(Count board_size, Count color_count) {
+    Problem res;
+    std::uniform_int_distribution<> distr(0, color_count-1);
+    res.color_count = color_count;
+    auto& board = res.board;
+    board.resize(board_size);
+    for (auto r = 0; r < board_size; ++r) {
+        string s;
+        for (auto c = 0; c < board_size; ++c) {
+            s.push_back(distr(RNG)+'0');
+        }
+        board[r] = s;
+    }
+    res.starting_seed = uniform_int_distribution<>(1)(RNG);
+    return res;
+}

@@ -16,13 +16,13 @@ macro(create_source_groups curdir)
 endmacro()
 
 # body
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.2)
 project (SquareRemover)
 
-list(APPEND CMAKE_CXX_FLAGS "-std=c++1y -Wno-sign-compare -Wno-char-subscripts")
+list(APPEND CMAKE_CXX_FLAGS "-std=c++1y -Wall -Werror -Wno-sign-compare -Wno-char-subscripts  -Wno-error=char-subscripts -Wno-macro-redefined -Wno-unused-const-variable")
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Wall -g")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -Wall -O3")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 
 
 set(BinDir ${PROJECT_SOURCE_DIR}/bin)
@@ -61,16 +61,36 @@ target_link_libraries(square_remover_app square_remover)
 add_executable(offline "./app/offline.cpp")
 target_link_libraries(offline square_remover)
 
+# submissions
 add_executable(v_1 "submit/v_1.cpp" "app/main_template.cpp")
 target_link_libraries(v_1 square_remover)
 
-add_executable(nika others/nika.cpp app/main_template.cpp)
-target_link_libraries(nika square_remover)
+add_executable(v_1_tester "submit/v_1.cpp" "app/tester_template.cpp")
+target_link_libraries(v_1_tester square_remover)
+
+# methods
+add_executable(naive app/methods.cpp app/main_template.cpp)
+target_link_libraries(naive square_remover)
+target_compile_definitions(naive PUBLIC -DSQR_REM_NAIVE)
+
+# others
+add_executable(psyho_tester others/psyho.cpp app/tester_template.cpp)
+target_link_libraries(psyho_tester square_remover)
+set_target_properties(psyho_tester PROPERTIES COMPILE_FLAGS "-Wno-unused-variable -Wno-logical-op-parentheses -Wno-return-type")
+
+add_executable(tanzaku_tester others/tanzaku.cpp app/tester_template.cpp)
+target_link_libraries(tanzaku_tester square_remover)
+set_target_properties(tanzaku_tester PROPERTIES COMPILE_FLAGS "-Wno-logical-op-parentheses -Wno-unused-const-variable")
+
+add_executable(wrong_tester others/wrong.cpp app/tester_template.cpp)
+target_link_libraries(wrong_tester square_remover)
+set_target_properties(wrong_tester PROPERTIES COMPILE_FLAGS "-Wno-logical-op-parentheses -Wno-unused-const-variable")
+
 
 find_library(GTEST_LIB gtest)
 if (NOT GTEST_LIB)
     message(FATAL_ERROR "gtest library not found")
 endif()
 
-add_executable(tester "./app/tester.cpp")
+add_executable(tester "app/tester_template.cpp")
 target_link_libraries(tester square_remover ${GTEST_LIB} )

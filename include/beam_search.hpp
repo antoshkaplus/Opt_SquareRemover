@@ -21,9 +21,7 @@ public:
         // random move when nothing to prune.
         // need better score function
         // you have number
-        
-    
-        
+
     }
     
     // client should look at history himself

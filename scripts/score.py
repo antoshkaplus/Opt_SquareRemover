@@ -37,7 +37,6 @@ def worker(i):
     command = ["java", "-jar", "SquareRemoverVis.jar", "-exec", "../bin/" + VERSION + " -d", "-novis", "-seed", str(i)]
     s = sp.check_output(command)
     lines = s.split("\n")
-    print lines
     for ln in lines:
         if ln.startswith(SCORE_START):
             return ln[len(SCORE_START):]

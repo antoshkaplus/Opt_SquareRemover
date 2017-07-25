@@ -7,15 +7,15 @@
 
 
 vector<string> b = {
-    "001",
-    "011",
-    "101"};
+        "001",
+        "011",
+        "101"};
 
 TEST(local_sq_rm, removal) {
-    
+
     Board bb;
-    
-    
+
+
     bb.Init(ToColorGrid(b), 2, 1);
     LocalSquareRemover sq_rm;
     sq_rm.Init(bb);
@@ -23,7 +23,7 @@ TEST(local_sq_rm, removal) {
     //Move m{{2, 0}, kDirRight};
     bb.MakeMove(m);
     cout << bb.grid() << endl;
-    sq_rm.Remove(m); 
+    sq_rm.Remove(m);
     cout << bb.grid() << endl;
 }
 
@@ -31,9 +31,9 @@ TEST(naive, solve) {
     NaiveSquareRemover sq_rm;
     Board bb;
     bb.Init(ToColorGrid(b), 2, 1);
-    
+
     auto ms = sq_rm.Solve(bb, 1);
-    cout << bb.grid(); 
+    cout << bb.grid();
 }
 
 

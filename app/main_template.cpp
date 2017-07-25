@@ -6,6 +6,7 @@
 /// -s : score function probably
 
 #include <chrono>
+#include <fstream>
 
 #include "util.hpp"
 #include "square_remover.hpp"
@@ -23,11 +24,12 @@ int main(int argc, const char * argv[]) {
 
     bool timed = false;
     if (parser.exists("t")) {
+        cerr << "timed" << endl;
         timed = true;
     }
 
     if (parser.exists("d")) {
-        // d stands for direct
+        cerr << "direct" << endl;
         in = &cin;
         out = &cout;
     } else {
@@ -58,8 +60,6 @@ int main(int argc, const char * argv[]) {
         std::cerr << "timeout";
         return 0;
     }
-    for (auto i : v) {
-        ant::Println(*out, i);
-    }
+    WriteSolution(*out, v);
     return 0;
 }

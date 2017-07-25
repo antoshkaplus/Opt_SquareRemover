@@ -20,7 +20,13 @@ const double TIME_LIMIT = 29.0 * TIME_MULT * 0.31;
 const double TIME_LIMIT = 29.0 * TIME_MULT;
 #endif
 
-#include <bits/stdtr1c++.h>
+#include <sstream>
+#include <unordered_set>
+#include <unordered_map>
+#include <cassert>
+#include <iostream>
+#include <string>
+#include <vector>
 #include <sys/time.h>
 #include <unistd.h>
 #include <emmintrin.h>
@@ -275,7 +281,7 @@ struct Move {
     short t2;
     short l;
     Move() { }
-    Move(short _x, short _y, short _t, short _l) : x(_x), y(_y), t(_t), l(_l), t2(0) { }
+    Move(short _x, short _y, short _t, short _l) : x(_x), y(_y), t(_t), t2(0), l(_l) { }
     Move(short _x, short _y, short _t, short _x2, short _y2, short _t2, short _l) : x(_x), y(_y), t(_t), x2(_x2), y2(_y2), t2(_t2), l(_l) { }
     bool operator < (const Move &m) const {
         return false;
@@ -541,7 +547,12 @@ void show(BYTE b[16][32]) {
     cerr << endl;
 }
 
-class SquareRemover{public: VI playIt(int colors, VS _board, int seed) {
+class SquareRemover {
+public:
+    VI playIt(int colors, VS _board, int seed);
+};
+
+VI SquareRemover::playIt(int colors, VS _board, int seed) {
         tGlobal.start();
 
         rng.init(1);
@@ -1189,5 +1200,4 @@ class SquareRemover{public: VI playIt(int colors, VS _board, int seed) {
         cerr << "Group = " << C << endl;
 
         return moves;
-    }
-};
+}

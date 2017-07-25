@@ -68,8 +68,6 @@ struct BeamSearch {
         return inds;
     }
     
-    
-    
 };
 
 

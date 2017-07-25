@@ -259,7 +259,7 @@ struct range {
 
 
     };
-    friend class range_iterator;
+    friend struct range_iterator;
     typedef range_iterator iterator;
 
 private:
@@ -322,7 +322,7 @@ const int kRight  = 1;
 const int kDown   = 2;
 const int kLeft   = 3;
 const int kDirectionCount = 4;
-const array<const int, kDirectionCount> kDirections = {kUp, kRight, kDown, kLeft};
+const array<const int, kDirectionCount> kDirections = {{kUp, kRight, kDown, kLeft}};
 
 typedef int Direction;
 typedef u_char Degree;
@@ -821,7 +821,7 @@ namespace square_remover {
 
 array<Position, 4>  squarePositions(const Position& square) {
     Int r = square.row, c = square.col;
-    return {Position(r, c), Position(r, c+1), Position(r+1, c), Position(r+1, c+1)};
+    return {{Position(r, c), Position(r, c+1), Position(r+1, c), Position(r+1, c+1)}};
 }
 
 Direction oppositeDirection(Direction d) {

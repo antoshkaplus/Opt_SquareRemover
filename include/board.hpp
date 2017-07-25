@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <functional>
+
 #include "util.hpp"
 
 
@@ -60,14 +62,19 @@ public:
     
     bool IsKillerMove(const Move& m) {
         MakeMove(m);
-        Position p_0 = m.pos - Indent{1,1};
-        Position p_1 = m.pos - Indent{1,0};
-        Position p_2 = m.another() - Indent{0,1};
-        Position p_3 = m.another();
-        bool res = false;
-        if (IsSquare(p_0) || IsSquare(p_1) || IsSquare(p_2) || IsSquare(p_3)) {
-            res = true;
+        array<Position, 4> ps;
+        if (m.isVertical()) {
+            ps = {{ m.pos.shifted(-1, -1),
+                    m.pos.shifted(-1, 0),
+                    m.another().shifted(0, -1),
+                    m.another() }};
+        } else {
+            ps = {{ m.pos.shifted(-1, -1),
+                    m.pos.shifted(0, -1),
+                    m.another().shifted(-1, 0),
+                    m.another() }};
         }
+        bool res = std::any_of(ps.begin(), ps.end(), std::bind(&Board::IsSquare, this, std::placeholders::_1));
         MakeMove(m);
         return res;
     }
@@ -94,6 +101,7 @@ public:
     
     bool IsSquare(const Position& p) const {
         auto& b = board_;
+        // could use intrinsics but mostly gonna get out on first or second comparizon
         return p.row < size()-1 && p.col < size()-1 && 
                 b(p.row  , p.col) == b(p.row  , p.col+1) &&
                 b(p.row+1, p.col) == b(p.row+1, p.col+1) &&
@@ -123,6 +131,8 @@ private:
 };
 
 
+// TODO fix virtuality
+// was created to take care of having loops in moves cuz of score board changes
 class HashedBoard : public Board {
 public:
     using HashFunction = ZobristHashing<64>; 
@@ -293,7 +303,7 @@ public:
 private:
     
     TripleCounter counter;
-    Count double_count;
+    //Count double_count;
     Count triple_count;
 };
 

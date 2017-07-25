@@ -8,7 +8,15 @@
 
 #include "util.hpp"
 
+#ifdef RNG
+
+default_random_engine RNG(std::chrono::system_clock::now().time_since_epoch().count());
+
+#else
+
 default_random_engine RNG;
+
+#endif
 
 
 Problem ReadProblem(istream& cin) {
@@ -38,11 +46,11 @@ void WriteProblem(ostream& out, const Problem& pr) {
 
 
 void WriteSolution(ostream& out, const vector<Move>& moves) {
-    map<Direction, int> ds = {{kDirUp, 0}, {kDirRight, 1}, {kDirDown, 2}, {kDirLeft, 3}};
+    static const map<Direction, int> ds = {{kDirUp, 0}, {kDirRight, 1}, {kDirDown, 2}, {kDirLeft, 3}};
     for (auto m : moves) {
         out << m.pos.row << endl;
         out << m.pos.col << endl;
-        out << ds[m.dir] << endl; 
+        out << ds.at(m.dir) << endl;
     }
 }
 

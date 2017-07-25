@@ -16,7 +16,7 @@
 #include <array>
 
 
-#include "ant/optimization.h"
+#include "ant/optimization/optimization.h"
 
 #include "util.hpp"
 
@@ -168,6 +168,7 @@ class Board {
     //Grid<char> colors_;
     
     // should be another class like hashed board or something like that
+    // TODO use trail node from core
     Grid<shared_ptr<Node<Location>>> board_hashes_;
     unordered_set<Location> existing_hashes_;
     shared_ptr<Node<Move>> move_history_;
