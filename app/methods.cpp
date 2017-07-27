@@ -43,3 +43,11 @@ std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> boar
 }
 
 #endif
+
+#ifdef SQR_REM_FOUR_MOVE
+
+std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
+    return square_remover::FourMoveSolver().playIt(colors, board, startingSeed);
+}
+
+#endif

@@ -1,40 +1,32 @@
-//
-//  local_square_remover.hpp
-//  SquareRemover
-//
-//  Created by Anton Logunov on 11/3/15.
-//
-//
-
 #pragma once
 
-#include "board.hpp"
+#include "ant/grid/grid.hpp"
 
-// class responsible for removing everything in the right order after move.
-class LocalSquareRemover {
+#include "util.hpp"
+
+class BoardSquareRemover {
+
+
 public:
-    
+
     void Init(Board& board) {
         board_ = &board;
     }
-    
+
     void Remove(const Move& m) {
-        AffectedPositions(m, affected_positions_);
-        Remove(affected_positions_);
-    }
-
-    void FindRemove() {
-
+        AddPossibleSquaresPositions(m);
+        Remove();
     }
 
     Count squares_removed() const {
-        return board_->squares_removed();
+        return squares_removed_;
     }
 
 private:
 
-    void Remove(vector<Position>& ps) {
+    void Remove() {
         auto& b = *board_;
+        auto& ps = possible_squares_;
         while (!ps.empty()) {
             auto p = ps.back();
             ps.pop_back();
@@ -45,7 +37,8 @@ private:
         }
     }
 
-    void AddAffectedBySquare(const Position& sq, vector<Position>& ps) {
+    // after we removed this square
+    void AddPossibleSquaresPositions(const Position& sq, vector<Position>& ps) {
         auto sz = ps.size();
         auto reg = AffectedRegionBySquare(sq);
         ps.reserve(sz + reg.cell_count());
@@ -63,22 +56,21 @@ private:
 
     // we expect empty ps. why do we reverse at the end, we should check in provided order
     // we reverse because we gonna take out from the back.. like stack. (should rename data structure then?)
-    void AffectedPositions(const Move& m, vector<Position>& ps) {
-        Region reg = AffectedRegion(m);
-        ps.reserve(reg.cell_count());
-        auto func = [&](const Position& p) {
-            ps.push_back(p);
-        };
-        reg.ForEach(func);
+    void AddPossibleSquaresPositions(const Move& m) {
+        vector<Position>& ps = possible_squares_;
+        m.ForEachPossibleSquare([&](const Position& p) {
+            ps.emplace(p);
+            is_possible_square_(index(p, board_)) = true;
+        });
         reverse(ps.begin(), ps.end());
     }
-    
+
     Region AffectedRegionBySquare(const Position& sq) {
         auto& b = *board_;
         auto aff_reg = Region(sq - Indent{1, 1}, Size{3, 3});
         return b.region().intersection(aff_reg);
     }
-    
+
     Region AffectedRegion(const Move& m) {
         // more optimal to use real positions
         // can have a boolean array that keeps track of all positions
@@ -86,11 +78,30 @@ private:
         auto ind = Indent{1,1};
         auto p = m.pos - ind;
         if (p.row < 0) p.row = 0;
-        if (p.col < 0) p.col = 0; 
-        return {p, m.another()}; 
+        if (p.col < 0) p.col = 0;
+        return {p, m.another()};
     }
-    
+
+
     Board* board_;
+    Count squares_removed_;
+
     // buffer
-    vector<Position> affected_positions_;
+    vector<Position> possible_squares_;
+    // after checking the value put back false in value field
+    vector<bool> is_possible_square_(board.size()*board.size(), false);
 };
+
+
+template<class Remover>
+class BoardNew {
+
+
+    Grid<uint8_t> grid_;
+    // take least possible guy
+    GridView<Grid<uint8_t>> view_(grid_);
+
+
+
+};
+

@@ -17,7 +17,7 @@
 
 namespace square_remover {
 
-    struct FourMoveSolver : Balance {
+    struct FourMoveSolver : Base {
 
         typedef u_char Degree;
 
@@ -29,10 +29,10 @@ namespace square_remover {
             Position square[2];
 
             Degree update(FourMoveSolver& solver) {
-                Count size = solver.board_size_;
+                Count size = solver.board_.size();
                 Position p = pos;
                 bool b_0, b_1, c_0_0 = false, c_0_1 = false, c_1_0 = false, c_1_1 = false;
-                solver.makeMove(*this);
+                solver.board_.MakeMove(*this);
                 degree = 0;
                 // here i want to know not only elimination degree, but eliminated squares
                 switch(dir) {
@@ -76,16 +76,16 @@ namespace square_remover {
                         break;
                     default: assert(false);
                 }
-                solver.makeMove(*this);
+                solver.board_.MakeMove(*this);
                 return degree;
             }
         };
 
-        vector<int> playIt(int colors, vector<string> board, int startingSeed) override {
+        vector<int> playIt(int colors, vector<string> board, int startingSeed) {
 //            ofstream output("out.txt");
             vector<int> int_moves;
             init(colors, board, startingSeed);
-            eliminate();
+            remover_.FindRemove();
             updateMoves();
             Move m, m_some;
             Count d, d_some;
@@ -96,8 +96,8 @@ namespace square_remover {
                     for (auto& p : four_moves_) {
                         m_some = p.second;
                         buffer = *this;
-                        buffer.makeMove(m_some);
-                        auto sqs = buffer.eliminate(m_some);
+                        buffer.board_.MakeMove(m_some);
+                        auto sqs = buffer.remover_.Remove(m_some);
                         buffer.updateMovesAfterEliminationMove(m_some, sqs);
                         d_some = sqs.size() + buffer.four_moves_.size();
                         if (d_some > d) {

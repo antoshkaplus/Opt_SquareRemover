@@ -83,6 +83,11 @@ target_link_libraries(wide square_remover)
 target_compile_definitions(wide PUBLIC -DSQR_REM_WIDE)
 set_target_properties(wide PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable")
 
+add_executable(four_move app/methods.cpp app/main_template.cpp)
+target_link_libraries(four_move square_remover)
+target_compile_definitions(four_move PUBLIC -DSQR_REM_FOUR_MOVE)
+set_target_properties(four_move PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable")
+
 
 # others
 add_executable(psyho others/psyho.cpp app/tester_template.cpp)
@@ -117,3 +122,15 @@ endif()
 
 add_executable(tester "app/tester_template.cpp")
 target_link_libraries(tester square_remover ${GTEST_LIB} )
+
+
+find_library(GBENCHMARK_LIBRARY benchmark)
+if (NOT GBENCHMARK_LIBRARY)
+    message(FATAL_ERROR "benchmark library not found")
+endif()
+
+add_executable(benchmark test/main_benchmark.cpp)
+target_link_libraries(benchmark ${GBENCHMARK_LIBRARY})
+if(UNIX AND NOT APPLE)
+    target_link_libraries(benchmark pthread)
+endif()

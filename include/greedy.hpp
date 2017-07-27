@@ -10,6 +10,7 @@
 
 #include "local_sq_rm.hpp"
 #include "score_calc.hpp"
+#include "hashed_board.hpp"
 
 class Greedy {
     using HashFunction = ZobristHashing<64>;

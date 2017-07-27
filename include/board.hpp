@@ -45,17 +45,31 @@ public:
         seed_ = ReplaceColors(board_, color_count_, p, seed_);
         ++squares_removed_;
     }
-    
+
     Color color(const Position& p) const {
         return board_[p];
-    } 
+    }
 
+    Color color(Index r, Index c) const {
+        return board_(r, c);
+    }
+
+    // if it's practical MakeMove, add method Try
     void MakeMove(const Move& m) {
         auto pos_2 = m.pos.Shifted(m.dir);
         assert(board_.IsInside(m.pos) && board_.IsInside(pos_2));
         swap(board_[m.pos], board_[pos_2]);
+        moves_->push_back(m);
     }
-    
+
+    template<class Func>
+    void ForMove(const Move& m, Func func) {
+        auto pos_2 = m.pos.Shifted(m.dir);
+        swap(board_[m.pos], board_[pos_2]);
+        func();
+        swap(board_[m.pos], board_[pos_2]);
+    }
+
     bool IsIdentityMove(const Move& m) {
         return color(m.pos) == color(m.another());
     }
@@ -78,7 +92,29 @@ public:
         MakeMove(m);
         return res;
     }
-    
+
+private:
+    Direction randomDirection() {
+        return rand()%kDirCount;
+    }
+
+    Position randomPosition() {
+        return Position(rand()%board_.row_count(), rand()%board_.col_count());
+    }
+
+public:
+    Move randomMove() {
+        Move m;
+        Position p;
+        do {
+            m.pos = randomPosition();
+            m.dir = randomDirection();
+            p = m.another();
+        } while(!board_.IsInside(p) ||
+                board_(p) == board_(m.pos));
+        return m;
+    }
+
     bool IsTriple(const Position p_0, const Position& p_1, const Position& p_2) const {
         return color(p_0) == color(p_1) && color(p_1) == color(p_2);
     }
@@ -119,6 +155,15 @@ public:
     Index seed() const {
         return seed_;
     }
+
+    void Print(ostream& out) {
+        for (auto r = 0; r < size(); ++r) {
+            for (auto c = 0; c < size(); ++c) {
+                out << char(board_(r, c) + '0');
+            }
+            out << endl;
+        }
+    }
     
 private:        
     Index seed_;
@@ -129,181 +174,3 @@ private:
     // ore may be computed everytime
     shared_ptr<vector<::Move>> moves_;
 };
-
-
-// TODO fix virtuality
-// was created to take care of having loops in moves cuz of score board changes
-class HashedBoard : public Board {
-public:
-    using HashFunction = ZobristHashing<64>; 
-    
-
-    void Init(const Grid<Color>& board, Count color_count, Index seed) {
-        Board::Init(board, color_count, seed);
-        hash_function_.reset(new HashFunction(board.size(), color_count));
-        auto is_filled = [](const Position& p) { return true; };
-        auto getter = [&](const Position& p) {
-            return color(p);
-        };
-        hash_ = hash_function_->Hash(is_filled, getter);
-    }
-
-    void MakeMove(const Move& m) {
-        auto& h = *hash_function_;
-        auto p = m.another();
-        h.xorState(&hash_, m.pos, color(m.pos));
-        h.xorState(&hash_, p, color(p));
-        Board::MakeMove(m);
-        h.xorState(&hash_, m.pos, color(m.pos));
-        h.xorState(&hash_, p, color(p));
-    }
-
-    void Remove(const Position& p) {
-        auto& h = *hash_function_;
-        for (auto& pp : SquarePositions(p)) {
-            h.xorState(&hash_, pp, color(pp));
-        }
-        Board::Remove(p);
-        for (auto& pp : SquarePositions(p)) {
-            h.xorState(&hash_, pp, color(pp));
-        }
-    }
-
-    HashFunction::value hash() const {
-        return hash_;
-    }
-
-private:
-    
-    HashFunction::value hash_;
-    shared_ptr<HashFunction> hash_function_;
-    
-};
-
-
-
-class CalculatedBoard : public Board {
-
-    struct TripleCounter {
-        void Init(const Board& b) {
-            board_ = &b;
-        }
-        
-        template<Direction dir>
-        Count Outer(const Position& p) {
-            auto& b = *board_; 
-            auto& g = board_->grid();
-            Count count = 0;
-            auto p_1 = p.Shifted(dir);
-            if (!g.IsInside(p_1)) {
-                return count;
-            }
-            auto& dd = kDirTurn[dir]; 
-            auto p_2 = p_1.Shifted(dd[0]);
-            if (g.IsInside(p_2) && b.IsTriple(p, p_1, p_2)) {
-                ++count; 
-            }
-            p_2 = p_1.Shifted(dd[1]);
-            if (g.IsInside(p_2) && b.IsTriple(p, p_1, p_2)) {
-                ++count;
-            }
-            return count;
-        }
-        
-        Count Outer(const Position& p, Direction dir) {
-            auto& b = *board_; 
-            auto& g = board_->grid();
-            Count count = 0;
-            auto p_1 = p.Shifted(dir);
-            if (!g.IsInside(p_1)) {
-                return count;
-            }
-            auto& dd = kDirTurn[dir]; 
-            auto p_2 = p_1.Shifted(dd[0]);
-            if (g.IsInside(p_2) && b.IsTriple(p, p_1, p_2)) {
-                ++count; 
-            }
-            p_2 = p_1.Shifted(dd[1]);
-            if (g.IsInside(p_2) && b.IsTriple(p, p_1, p_2)) {
-                ++count;
-            }
-            return count;
-        }
-        
-        Count Everything(const Position& p) {
-            return OuterAll(p) + Center(p);
-        }
-        
-        
-        Count OuterAll(const Position& p) {
-            return Outer<kDirUp>(p) + Outer<kDirDown>(p) + 
-                Outer<kDirRight>(p) + Outer<kDirLeft>(p);
-        }
-        
-        Count OuterSquare(const Position& p) {
-            auto ps = SquarePositions(p);
-            Count count = 0;
-            Direction dir = kDirLeft;
-            for (auto p : ps) {
-                count += Center(p);
-                count += Outer(p, dir);
-                dir = kDirClockwise[dir];
-                count += Outer(p, dir);
-            }
-            return count;
-        }
-        
-        Count Center(const Position& p) {
-            auto& b = *board_; 
-            auto& g = board_->grid();
-            Count count = 0;
-            for (Direction d : kDirections) {
-                auto p_1 = p.Shifted(d);
-                if (!g.IsInside(p_1)) continue;
-                auto p_2 = p.Shifted(kDirClockwise[d]);
-                if (!g.IsInside(p_2) || !b.IsTriple(p, p_1, p_2)) {
-                    continue;
-                }
-                ++count;
-            }
-            return count;
-        }
-        
-        const Board* board_;
-    };
-    
-    struct DoubleCounter {
-        
-        
-    };
-    
-    
-
-public:
-    void Init(const Grid<Color>& board, Count color_count, Index seed) {
-        Board::Init(board, color_count, seed);
-        // count triples  here
-        
-        // count doubles here
-    }
-
-    void MakeMove(const Move& m) {
-        assert(color(m.pos) != color(m.another()));
-        triple_count -= counter.Everything(m.pos) + counter.Everything(m.another());
-        Board::MakeMove(m);
-        triple_count += counter.Everything(m.pos) + counter.Everything(m.another());
-    }
-    
-    void Remove(const Position& p) {
-        triple_count -= counter.OuterSquare(p);
-        Board::Remove(p);
-        triple_count += counter.OuterSquare(p);
-    }
-
-private:
-    
-    TripleCounter counter;
-    //Count double_count;
-    Count triple_count;
-};
-

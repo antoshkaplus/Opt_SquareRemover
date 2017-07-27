@@ -61,6 +61,9 @@ struct Move {
 
     // 2 bit per dir, 5 bits row / col (due to extended board)
     // 12 bits total
+
+    // used to fully identify move in space but not the square!!!
+    // doesn't take into account opposite moves
     int index() const {
         return (dir << 10) | (pos.row << 5) | pos.col;
     }
@@ -84,7 +87,25 @@ struct Move {
     bool isHorizontal() const {
         return dir == kDirRight || dir == kDirLeft;
     }
+
+    template<class Func>
+    void ForEachPossibleSquare(Func func) {
+        func(pos.shifted(-1, -1));
+        func(another());
+        if (isVertical()) {
+            func(pos.shifted(-1, 0));
+            func(another().shifted(0, -1));
+        } else {
+            func(pos.shifted(0, -1));
+            func(another().shifted(-1, 0));
+        }
+    }
 };
+
+template<class Board>
+Index index(const Position& p, const Board& b) {
+    return 0;
+}
 
 
 struct Problem {
