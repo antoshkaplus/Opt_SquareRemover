@@ -1,105 +1,22 @@
-//
-//  board_simulation.hpp
-//  SquareRemover
-//
-//  Created by Anton Logunov on 1/15/15.
-//
-//
+#pragma once
 
-#ifndef SquareRemover_board_simulation_hpp
-#define SquareRemover_board_simulation_hpp
-
-#include <stack>
-
+#include "util.hpp"
 #include "board.hpp"
 
-namespace square_remover {
-    
-struct Simulation {
-    unordered_set<Location> removed_hashes;
-    vector<Location> new_hashes;
-};
 
-// trying to put functionality of board_2 in separate class ???
-struct BoardSimulation {
-    
-    struct Return {
-        Position pos;
-        char color;
-    };
-
-    OriginGrid<Grid<char>> colors_;
-    stack<Return> return_colors_;
-     unordered_set<Location> existing_hashes_;
-    int seed_;
-    int color_count_;
-
-    Simulation sim_;
-
-
-    Simulation Remove(Location loc) {
-        Move m{loc};
-        return_colors_.emplace(m.p_0, colors_(m.p_0));
-        return_colors_.emplace(m.p_0, colors_(m.p_1));
-
-        swap(colors_(m.p_0), colors_(m.p_1));
-        // don't need to remove loc right away
-        // will be done in RemoveSquares
-        RemoveSquares({loc.row, loc.col});
-
-
-
+class BoardState_v2 {
+public:
+    void OnRegionChanged(const Region& region) {
+        ValidateOneMoves();
+        UpdateOneMoves_2(region);
     }
 
-    constexpr static array<Position, 9> PotentialRemovals(const Position& p) {
-        int r = p.row;
-        int c = p.col;
-        return {{   {r-1, c-1}, {r-1, c}, {r-1, c+1},
-            {r, c-1}, {r, c}, {r, c+1},
-            {r+1, c-1}, {r+1, c}, {r+1, c+1} }};
-    }
-
-    void RemoveSquares(const Position& p) {
-        Region update_one_moves(p, {2, 2});
-
-        vector<Position> ps;
-        // we want to take positions from back
-        auto order = [](const Position& p_0, const Position& p_1) {
-            return p_0.row > p_1.row || (p_0.row == p_1.row && p_0.col > p_1.col);
-        };
-        vector<Position> removed_ps;
-        ps.emplace_back(p.row, p.col);
-
-        while (!ps.empty()) {
-            Position p = ps.back();
-            ps.pop_back();
-            // emplace for goiing back
-            return_colors_.emplace(p, ...);
-            seed_ = ReplaceColors(colors_, color_count_, p, seed_);
-
-            update_one_moves.Unite({p, {2, 2}});
-
-            for (Position pp : SquarePositions(p)) {
-                removed_ps.push_back(pp);
-            }
-            for (Position pp : PotentialRemovals(p)) {
-                auto it = lower_bound(ps.begin(), ps.end(), pp, order);
-                if (*it == pp) {
-                    continue;
-                }
-                ps.insert(it, pp);
-            }
-            while (!ps.empty() && !IsSquare(colors_, ps.back())) ps.pop_back();
-        }
-
-        for (auto p : removed_ps) {
-            // value is changing inside RemoveLocation
-            auto node = board_
-        }
-        UpdateOneMoves(update_one_moves);
+    Count SquareMoveCount() const {
+        return sq_locs_.size();
     }
 
 
+private:
     void AddLocation(char r, char c, char combo) {
         AddLocation({r, c, combo});
     }
@@ -222,20 +139,10 @@ struct BoardSimulation {
         }
     }
 
+    void ValidateOneMoves() {
 
-    void UpdateOneMoves(const Region& region) {
-        UpdateOneMoves_2(region);
     }
 
-
-
+    Board* board_;
+    std::unordered_set<Location> sq_locs_;
 };
-
-
-
-
-}
-
-
-
-#endif

@@ -27,6 +27,13 @@ public:
 
     }
 
+    template<class Func>
+    void ForRemove(Func func, const Move& m) {
+        Remove(m);
+        func();
+        // restore
+    }
+
     Count squares_removed() const {
         return board_->squares_removed();
     }

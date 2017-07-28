@@ -22,53 +22,6 @@
 
 
 
-namespace square_remover {
-    
-// could use Position actually, but this takes less memory
-// used to perfectly identify 4 move.
-struct  Location {
-    char row;
-    char col; 
-    char combo;
-}; 
-
-constexpr bool operator==(const Location& loc_0, const Location& loc_1) {
-    return loc_0.row == loc_1.row && loc_0.col == loc_1.col && loc_0.combo == loc_1.combo;
-}
-
-
-}
-
-
-namespace std {
-    
-template <> 
-struct hash<square_remover::Location> {
-    size_t operator()(const square_remover::Location& x) const {
-        return (x.row << 16) | (x.col << 8) | x.combo;
-    }
-};
-    
-}
-
-
-namespace square_remover {
-
-using namespace ant::opt;
-
-
-// ?
-//   
-// 0 : top, right, top 
-// 1 : top, right, right 
-// 2 : bottom, right, right
-// 3 : bottom, right, bottom
-// 4 : bottom, left, bototm
-// 5 : bottom, left, left
-// 6 : top, left, left
-// 7 : top, left, top
-//
-
     
 struct Move {
     

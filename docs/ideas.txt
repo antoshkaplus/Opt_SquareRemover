@@ -44,3 +44,9 @@ output to some kind of file and rearrange...
 
 
 # having board size bigger than normal is awesome idea to not check for bounds
+
+Location is easier to validate than Move
+
+make use of elimination degree.
+to make it work your state has to work with moves instead of Locations.
+and when you validate it's a lot more to check

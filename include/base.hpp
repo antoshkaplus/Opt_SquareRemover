@@ -40,20 +40,6 @@ ostream& operator<<(ostream& output, const Move& m);
 
 /* uses rand() function, so be careful and probably init srand() */
 struct Base {
-    vector<int> playIt(int colors, vector<string> board, int startingSeed) {
-        vector<int> moves;
-        init(colors, board, startingSeed);
-        remover_.FindRemove();
-        for (auto i = 0; i < kMoveCount; ++i) {
-            Move m = board_.randomMove();
-            board_.MakeMove(m);
-            moves.push_back(m.pos.row);
-            moves.push_back(m.pos.col);
-            moves.push_back(m.dir);
-            remover_.FindRemove();
-        }
-        return moves;
-    }
 
 protected:
 
