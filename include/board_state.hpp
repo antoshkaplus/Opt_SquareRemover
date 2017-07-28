@@ -5,6 +5,11 @@
 #include "board.hpp"
 
 class BoardState {
+public:
+
+    void Init(const Board& b) {
+        board_ = &b;
+    }
 
     void OnRegionChanged(const Region& reg) {
         ValidateSqLocs();
@@ -112,5 +117,5 @@ private:
     }
 
     std::unordered_set<Location> sq_locs_;
-    Board board_;
+    const Board* board_;
 };

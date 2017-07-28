@@ -18,6 +18,10 @@ struct  Location {
     char row;
     char col;
     Combo combo;
+
+    Move toMove() {
+
+    }
 };
 
 constexpr bool operator==(const Location& loc_0, const Location& loc_1) {
