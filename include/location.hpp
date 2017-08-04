@@ -20,7 +20,25 @@ struct  Location {
     Combo combo;
 
     Move toMove() {
-
+        switch (combo) {
+            case Combo::TopRiTop:
+                return Move(row-1, col+1, kDirDown);
+            case Combo::TopRiRi:
+                return Move(row, col+1, kDirRight);
+            case Combo::BotRiRi:
+                return Move(row+1, col+1, kDirRight);
+            case Combo::BotRiBot:
+                return Move(row+1, col+1, kDirDown);
+            case Combo::BotLeBot:
+                return Move(row+1, col, kDirDown);
+            case Combo::BotLeLe:
+                return Move(row+1, col-1, kDirRight);
+            case Combo::TopLeLe:
+                return Move(row, col-1, kDirRight);
+            case Combo::TopLeTop:
+                return Move(row-1, col, kDirDown);
+        }
+        throw std::runtime_error("unknown combo");
     }
 };
 
@@ -44,7 +62,7 @@ struct hash<Location> {
 
 // 0 : top, right, top
 
-//   x
+//  x
 // xo
 // xx
 
