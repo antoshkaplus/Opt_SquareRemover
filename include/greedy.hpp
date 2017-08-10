@@ -8,26 +8,24 @@
 
 #pragma once
 
-#include "local_sq_rm.hpp"
 #include "score_calc.hpp"
-#include "hashed_board.hpp"
 
+
+template<class LocalSqRem>
 class Greedy {
     using HashFunction = ZobristHashing<64>;
 
 public:
     vector<Move> Solve(Board& b_in, Count move_count) {
         vector<Move> res;
-        HashedBoard b;
+        Board b;
         b.Init(b_in.grid(), b_in.color_count(), b_in.seed());
         
         // reuse object. less allocations
         Board new_b; 
-        LocalSquareRemover local;
+        LocalSqRem local;
         ScoreCalculator score_calc;
-        // now it should inside board... to keep hash
-        unordered_set<HashFunction::value> visited;
-        
+
         for (Index i = 0; i < move_count; ++i) {
             
             vector<Move> best_ms;
@@ -59,7 +57,7 @@ public:
                 Index k = distr(RNG);
                 b.MakeMove(best_ms[k]);
                 // after we made blind move
-                if (best_sq_rm > 1 || visited.count(b.hash()) == 0) {
+                if (best_sq_rm > 1) {
                     m = best_ms[k];
                     break;
                 }
@@ -75,7 +73,6 @@ public:
                     }
                 }
             }
-            visited.insert(b.hash());
             res.push_back(m);
             local.Init(b);
             local.Remove(m);

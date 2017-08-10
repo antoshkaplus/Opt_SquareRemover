@@ -1,69 +1,70 @@
 #pragma once
 
+#include "board.hpp"
+
+
 class LocalSqRm_v2 {
 
-    // can't you just eliminate online?? why create this stupid vector??
-    // so stupid!!!
-    vector<Position> eliminateCandidates(const Region& rect) {
-        vector<Position> candidates;
-        for (auto r = rect.row_begin(); r < rect.row_end()-1; ++r) {
-            for (auto c = rect.col_begin(); c < rect.col_end()-1; ++c) {
+    // don't think pushing everything at once will help in any way
+    void AddEliminateCandidate(const Region& rect) {
+        for (auto r = rect.row_begin(); r < rect.row_end(); ++r) {
+            for (auto c = rect.col_begin(); c < rect.col_end(); ++c) {
                 Position p(r, c);
-                if (isFourSquare(p)) candidates.push_back(p);
+                if (board_->IsSquare(p)) {
+                    assert(board_->sq_region().hasInside(p));
+                    heap_.push(p);
+                }
             }
         }
-        return candidates;
     }
 
-    // need function that receives just position
-    virtual vector<Position> eliminate(Region rect) {
-        vector<Position> squares;
-        priority_queue<Position, vector<Position>, Position::BottomRightComparator> heap;
-        while(true) {
-            for (auto& p : eliminateCandidates(rect)) {
-                heap.push(p);
-            }
-            if (heap.empty()) break;
-            Position p = heap.top();
-            heap.pop();
-            // when we come p maybe already not to be a square
-            if (isFourSquare(p)) {
-                ++eliminated_count_;
-                color_seed_ = ReplaceColors(color_board_, color_count_, p, color_seed_);
-                squares.push_back(p);
-                rect = boardRectangle().intersection(Region(p.row-1, p.col-1, 4, 4));
+    void eliminate(Region rect) {
+        for (;;) {
+            AddEliminateCandidate(rect);
+
+            if (heap_.empty()) break;
+
+            Position p = heap_.top();
+            heap_.pop();
+            // when we come p may not to be a square
+            if (board_->IsSquare(p)) {
+                board_->Remove(p);
+                squares_.push_back(p);
+                rect = board_->region().intersection(Region(p.row - 1, p.col - 1, 3, 3));
+            } else {
+                rect = {};
             }
         }
-        return squares;
     }
 
-    // better to throw exception if different from Down, Right
-    vector<Position> eliminate(const Move& m) {
-        Region rect;
-        rect.position = m.pos;
-        switch(m.dir) {
-            case kDirDown:
-                rect.shift(-1, -1);
-                rect.size.set(4, 3);
-                break;
-            case kDirUp:
-                rect.shift(-2, -1);
-                rect.size.set(4, 3);
-                break;
-            case kDirRight:
-                rect.shift(-1, -1);
-                rect.size.set(3, 4);
-                break;
-            case kDirLeft:
-                rect.shift(-1, -2);
-                rect.size.set(3, 4);
-                break;
-            default: assert(false);
-        }
-        return eliminate(boardRectangle().intersection(rect));
+public:
+
+    void Init(Board& board) {
+        board_ = &board;
     }
 
-    vector<Position> eliminate() {
-        return eliminate(boardRectangle());
+    void Remove(const Move& m) {
+        squares_.clear();
+
+        auto ind = Indent{1,1};
+        auto p = m.pos - ind;
+
+        Region rect{p, m.another()};
+        return eliminate(board_->region().intersection(rect));
     }
+
+    void Eliminate() {
+        squares_.clear();
+
+        return eliminate(board_->region());
+    }
+
+    const vector<Position>& removed_squares() const {
+        return squares_;
+    }
+
+private:
+    Board *board_;
+    priority_queue <Position, vector<Position>, Position::BottomRightComparator> heap_;
+    vector <Position> squares_;
 };

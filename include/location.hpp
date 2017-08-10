@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util.hpp"
+
 enum class Combo : uint8_t {
     TopRiTop,
     TopRiRi,
@@ -51,7 +53,7 @@ namespace std {
 
 template <>
 struct hash<Location> {
-    size_t operator()(const square_remover::Location& x) const {
+    size_t operator()(const Location& x) const {
         return (x.row << 16) | (x.col << 8) | x.combo;
     }
 };

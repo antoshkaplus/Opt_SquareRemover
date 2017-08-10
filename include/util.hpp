@@ -9,7 +9,9 @@ using namespace std;
 using namespace ant;
 using namespace ant::grid;
     
-    
+
+using BitColor = uint8_t;
+using DigitColor = uint8_t;
 using Color = short;
 using Seed = int;
 
@@ -26,8 +28,24 @@ constexpr int NextSeed(int current_seed) {
     return ((int64_t)current_seed * 48271) % 2147483647; 
 }
 
-constexpr char NextColor(int current_seed, char color_count) {
+constexpr uint8_t NextColor(int current_seed, char color_count) {
     return current_seed % color_count;
+}
+
+inline BitColor DigitColotToBit(DigitColor digit_color) {
+    return 1 << digit_color;
+}
+
+inline DigitColor BitColorToDigit(BitColor bit_color) {
+    switch (bit_color) {
+        case 1 << 0: return 0;
+        case 1 << 1: return 1;
+        case 1 << 2: return 2;
+        case 1 << 3: return 3;
+        case 1 << 4: return 4;
+        case 1 << 5: return 5;
+        default: throw runtime_error("unknown bit color");
+    }
 }
 
 // replace it with the loop around SquarePositions
@@ -41,6 +59,22 @@ constexpr int ReplaceColors(Grid& board, char color_count, Position p, int curre
     board(p.row+1, p.col) = NextColor(current_seed, color_count);
     current_seed = NextSeed(current_seed);
     board(p.row+1, p.col+1) = NextColor(current_seed, color_count);
+    current_seed = NextSeed(current_seed);
+    return current_seed;
+}
+
+template<class Grid>
+int ReplaceBitColors(Grid& board, char color_count, Position p, int current_seed) {
+    auto localNextColor = [=](int seed) {
+        return DigitColotToBit(NextColor(seed, color_count));
+    };
+    board(p.row, p.col) = localNextColor(current_seed);
+    current_seed = NextSeed(current_seed);
+    board(p.row, p.col+1) = localNextColor(current_seed);
+    current_seed = NextSeed(current_seed);
+    board(p.row+1, p.col) = localNextColor(current_seed);
+    current_seed = NextSeed(current_seed);
+    board(p.row+1, p.col+1) = localNextColor(current_seed);
     current_seed = NextSeed(current_seed);
     return current_seed;
 }
@@ -102,9 +136,21 @@ struct Move {
     }
 };
 
+struct DoubleMove : Move {
+    DoubleMove() {}
+    DoubleMove(const Move& m, const Move& next)
+    : Move(m), next(next) {}
+    Index index() {
+        Index i = 0;
+        i = next.index() << 12 | Move::index();
+        return i;
+    }
+    Move next;
+};
+
 template<class Board>
 Index index(const Position& p, const Board& b) {
-    return 0;
+    throw runtime_error("not implemented");
 }
 
 
@@ -137,7 +183,7 @@ inline vector<int> ToSolution(const vector<Move>& moves) {
     return res;
 }
 
-Grid<Color> ToColorGrid(const vector<string>& b);
+Grid<DigitColor> ToColorGrid(const vector<string>& b);
 
 inline vector<string> GenerateStrBoard(Count sz, Count colors) {
     vector<string> b(sz);

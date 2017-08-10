@@ -372,8 +372,12 @@ namespace square_remover {
         friend struct Base;
     };
 
-    ostream& operator<<(ostream& output, const Wide::Stats& s);
-
+    inline ostream& operator<<(ostream& output, const Wide::Stats& s) {
+        return output
+        << "el: " << s.eliminated_count
+        << " fmd: " << s.four_move_degree
+        << " bal: " << s.position_balance;
+    }
 }
 
 

@@ -10,7 +10,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "base.hpp"
+#include "util.hpp"
 
 
 // for each position check what's around it.

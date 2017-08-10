@@ -9,7 +9,7 @@ public:
 
 	void Init(const Board& b) {
 		board_ = &b;
-		open_.resize(b.size(), b.size());
+		open_.resize(b.extended_size(), b.extended_size());
 	}
 
 	// more is better
@@ -35,17 +35,16 @@ private:
 				// can use current p_2
 				Position p_1 = p + i_1;
 				Position p_2 = p + i_2;
-				if (g.IsInside(p_1) && g.IsInside(p_2) &&
-					open_(p_1) && open_(p_2) &&
-					g(p) == g(p_1) && g(p) == g(p_2)) {
+				if (open_(p_1) && open_(p_2) && (g(p) & g(p_1) & g(p_2))) {
 
 					++triples;
 					open_(p) = open_(p_1) = open_(p_2) = false;
 				}
+                // it seems like it doesn't work as expected.
 				tie(i_1, i_2) = make_tuple(i_2, i_1*=-1);
 			}
 		};
-		g.ForEachPosition(func);
+		board_->region().ForEach(func);
 		return triples;
 	}
 
@@ -59,12 +58,12 @@ private:
 			if (!open_(p)) return;
 			for (auto d : {kDirRight, kDirDown}) {
 				auto pp = p.Shifted(d);
-				if (g.isInside(pp) && open_(pp) && g(p) == g(pp)) {
+				if (open_(pp) && g(p) == g(pp)) {
 					++doubles;
 				}
 			}
 		};
-		g.ForEachPosition(func);
+		board_->region().ForEach(func);
 		return doubles;
 	}
 

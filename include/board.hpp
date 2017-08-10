@@ -13,61 +13,61 @@
 #include "util.hpp"
 
 
-
 class Board {
 public:
     
     Board() {}
-    Board(const Grid<Color>& board, Count color_count, Index seed) {
+    Board(const Grid<DigitColor>& board, Count color_count, Index seed) {
         Init(board, color_count, seed);
     }
     
-    void Init(const Grid<Color>& board, Count color_count, Index seed) {
-        board_ = board;
+    void Init(const Grid<DigitColor>& board, Count color_count, Index seed) {
+        // I need to redraw board
+        InitBitBoard(board);
+
         color_count_ = color_count;
         seed_ = seed;
         squares_removed_ = 0;
         moves_.reset(new vector<Move>());
-        
-        Region reg{{0, 0}, board.size()};
-        for (Position p : reg) {
-            if (p.col < size()-1) {
+
+        for (Position p : region()) {
+            if (p.col < region().col_end()-1) {
                 moves_->emplace_back(p, kDirRight);
             }
-            if (p.row < size()-1) {
+            if (p.row < region().row_end()-1) {
                 moves_->emplace_back(p, kDirDown);
             }
         }
     }
     
     // should I be able to go back in time???
+    // it's not easy to spot how much
     void Remove(const Position& p) {
-        seed_ = ReplaceColors(board_, color_count_, p, seed_);
+        seed_ = ReplaceBitColors(bit_board_, color_count_, p, seed_);
         ++squares_removed_;
     }
 
-    Color color(const Position& p) const {
-        return board_[p];
+    BitColor color(const Position& p) const {
+        return bit_board_[p];
     }
 
-    Color color(Index r, Index c) const {
-        return board_(r, c);
+    BitColor color(Index r, Index c) const {
+        return bit_board_(r, c);
     }
 
     // if it's practical MakeMove, add method Try
     void MakeMove(const Move& m) {
         auto pos_2 = m.pos.Shifted(m.dir);
-        assert(board_.IsInside(m.pos) && board_.IsInside(pos_2));
-        swap(board_[m.pos], board_[pos_2]);
-        moves_->push_back(m);
+        assert(region().hasInside(m.pos) && region().hasInside(pos_2));
+        swap(bit_board_[m.pos], bit_board_[pos_2]);
     }
 
     template<class Func>
     void ForMove(const Move& m, Func func) {
         auto pos_2 = m.pos.Shifted(m.dir);
-        swap(board_[m.pos], board_[pos_2]);
+        swap(bit_board_[m.pos], bit_board_[pos_2]);
         func();
-        swap(board_[m.pos], board_[pos_2]);
+        swap(bit_board_[m.pos], bit_board_[pos_2]);
     }
 
     bool IsIdentityMove(const Move& m) {
@@ -99,7 +99,7 @@ private:
     }
 
     Position randomPosition() {
-        return Position(rand()%board_.row_count(), rand()%board_.col_count());
+        return Position(rand()%region_.row_count() +1, rand()%region_.col_count() +1);
     }
 
 public:
@@ -110,21 +110,24 @@ public:
             m.pos = randomPosition();
             m.dir = randomDirection();
             p = m.another();
-        } while(!board_.IsInside(p) ||
-                board_(p) == board_(m.pos));
+        } while(!region().hasInside(p));
         return m;
     }
 
     bool IsTriple(const Position p_0, const Position& p_1, const Position& p_2) const {
-        return color(p_0) == color(p_1) && color(p_1) == color(p_2);
+        return static_cast<bool>(color(p_0) & color(p_1) & color(p_2));
     }
     
-    const Grid<Color>& grid() const {
-        return board_;
+    const Grid<BitColor>& grid() const {
+        return bit_board_;
     }
     
     const Region region() const {
-         return Region(0, 0, size(), size());
+         return region_;
+    }
+
+    const Region sq_region() const {
+        return sq_region_;
     }
     
     const vector<::Move>& moves() const {
@@ -136,40 +139,53 @@ public:
     }
     
     bool IsSquare(const Position& p) const {
-        auto& b = board_;
+        auto& b = bit_board_;
         // could use intrinsics but mostly gonna get out on first or second comparizon
-        return p.row < size()-1 && p.col < size()-1 && 
-                b(p.row  , p.col) == b(p.row  , p.col+1) &&
-                b(p.row+1, p.col) == b(p.row+1, p.col+1) &&
-                b(p.row  , p.col) == b(p.row+1, p.col+1);
+        return static_cast<bool>(b(p.row  , p.col) & b(p.row  , p.col+1) & b(p.row+1, p.col) & b(p.row+1, p.col+1));
     }
-    
-    Count size() const {
-        return board_.size().row;
-    }
-    
+
     Count color_count() const {
         return color_count_;
     }
-    
+
+    Count extended_size() const {
+        return bit_board_.size().row;
+    }
+
     Index seed() const {
         return seed_;
     }
 
     void Print(ostream& out) {
-        for (auto r = 0; r < size(); ++r) {
-            for (auto c = 0; c < size(); ++c) {
-                out << char(board_(r, c) + '0');
+        for (auto r = region().row_begin(); r < region().row_end(); ++r) {
+            for (auto c = region().col_begin(); c < region().col_end(); ++c) {
+                out << char(BitColorToDigit(bit_board_(r, c)) + '0');
             }
             out << endl;
         }
     }
     
-private:        
+private:
+
+    void InitBitBoard(Grid<DigitColor> digit_board) {
+        region_ = Region(1, 1, digit_board.size().row, digit_board.size().col);
+        sq_region_ = Region(1, 1, digit_board.size().row-1, digit_board.size().col);
+
+        bit_board_.resize(digit_board.size().row+2, digit_board.size().col+2);
+        fill(bit_board_.begin(), bit_board_.end(), 0);
+        auto func = [&](const Position& p) {
+            bit_board_(p.shifted(1, 1)) = DigitColotToBit(digit_board(p));
+        };
+        digit_board.ForEachPosition(func);
+    }
+
+    Region region_;
+    Region sq_region_;
+    Grid<BitColor> bit_board_;
+
     Index seed_;
     Count color_count_;
     Count squares_removed_;    
-    Grid<Color> board_;
     // this one should not be stored here
     // ore may be computed everytime
     shared_ptr<vector<::Move>> moves_;

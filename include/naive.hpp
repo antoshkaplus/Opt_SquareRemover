@@ -8,20 +8,21 @@
 
 #pragma once
 
-#include "local_sq_rm.hpp"
+#include "board.hpp"
 
+template<class LocalSqRm>
 class NaiveSquareRemover {
 public:
     vector<Move> Solve(Board& b, Count move_count) {
         vector<Move> res;
         // reuse object. less allocations
-        Board new_b; 
-        LocalSquareRemover local;
+        Board new_b;
+        LocalSqRm local;
         for (Index i = 0; i < move_count; ++i) {
             
             vector<Move> best_ms;
             Count best_sq_rm = -1;
-            
+
             local.Init(new_b);
             for (auto& m : b.moves()) {
                 new_b = b;

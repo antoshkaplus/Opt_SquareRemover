@@ -6,12 +6,12 @@
 //
 //
 
-#pragma once 
+#pragma once
 
-#include "local_sq_rm.hpp"
 #include "board_state.hpp"
 
 
+template<class LocalSqRm>
 class BeamSearch {
 public:
 
@@ -23,7 +23,6 @@ public:
 
         void Init(const Board& b) {
             board_ = b;
-            remover_.Init(board_);
             state_.Init(board_);
         }
 
@@ -35,13 +34,8 @@ public:
             return board_;
         }
 
-        auto& remover() {
-            return remover_;
-        }
-
     private:
         Board board_;
-        LocalSquareRemover remover_;
         BoardState state_;
     };
 

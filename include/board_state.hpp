@@ -20,8 +20,8 @@ public:
 
     }
 
-    bool HasSqLocs() {
-        return !sq_locs_.empty();
+    bool sq_locs_empty() const {
+        return sq_locs_.empty();
     }
 
     template<class Func>
@@ -33,7 +33,7 @@ private:
 
     void UpdateSqLocs(const Region& reg) {
 
-        auto& cs = std::bind(board.color, std::placeholders::_1, std::placeholders::_2);
+        auto& cs = std::bind(board_->color, std::placeholders::_1, std::placeholders::_2);
         for (auto r = reg.row_begin()-1; r < reg.row_end()+1; ++r) {
             for (auto c = reg.col_begin()-1; c < reg.col_end()+1; ++c) {
                 char color;

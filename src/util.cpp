@@ -55,8 +55,8 @@ void WriteSolution(ostream& out, const vector<Move>& moves) {
 }
 
 
-Grid<Color> ToColorGrid(const vector<string>& b) {
-    Grid<Color> g;
+Grid<DigitColor> ToColorGrid(const vector<string>& b) {
+    Grid<DigitColor> g;
     auto sz = b.size();
     g.resize(sz, sz);
     auto func = [&](const Position& p) {

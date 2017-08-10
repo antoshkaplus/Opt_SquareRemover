@@ -134,3 +134,7 @@ target_link_libraries(benchmark ${GBENCHMARK_LIBRARY})
 if(UNIX AND NOT APPLE)
     target_link_libraries(benchmark pthread)
 endif()
+
+
+add_executable(unittest test/main.cpp)
+target_link_libraries(unittest square_remover ${GTEST_LIB})
