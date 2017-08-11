@@ -189,4 +189,7 @@ private:
     // this one should not be stored here
     // ore may be computed everytime
     shared_ptr<vector<::Move>> moves_;
+
+    friend class BoardState;
+    friend class BoardRestore;
 };

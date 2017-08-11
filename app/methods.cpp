@@ -1,6 +1,7 @@
 #include "naive.hpp"
 #include "greedy.hpp"
-#include "wide.hpp"
+//#include "wide.hpp"
+#include "beam_search.hpp"
 
 
 class SquareRemover {
@@ -48,6 +49,19 @@ std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> boar
 
 std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
     return square_remover::FourMoveSolver().playIt(colors, board, startingSeed);
+}
+
+#endif
+
+#ifdef SQR_REM_BEAM
+
+std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
+    Grid<DigitColor> g = ToColorGrid(board);
+    Board b(g, colors, startingSeed);
+    BeamSearch<LocalSqRm_v2> beam;
+    beam.Remove(b, kMoveCount, 10);
+
+    return vector<int>();
 }
 
 #endif

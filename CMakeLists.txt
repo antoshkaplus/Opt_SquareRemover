@@ -88,6 +88,11 @@ target_link_libraries(four_move square_remover)
 target_compile_definitions(four_move PUBLIC -DSQR_REM_FOUR_MOVE)
 set_target_properties(four_move PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable")
 
+add_executable(beam app/methods.cpp app/main_template.cpp)
+target_link_libraries(beam square_remover)
+target_compile_definitions(beam PUBLIC -DSQR_REM_BEAM)
+set_target_properties(beam PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable -Wno-narrowing")
+
 
 # others
 add_executable(psyho others/psyho.cpp app/tester_template.cpp)
@@ -138,3 +143,4 @@ endif()
 
 add_executable(unittest test/main.cpp)
 target_link_libraries(unittest square_remover ${GTEST_LIB})
+set_target_properties(unittest PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable -Wno-narrowing")

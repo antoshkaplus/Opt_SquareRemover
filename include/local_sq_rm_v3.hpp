@@ -41,8 +41,9 @@ class LocalSqRm_v3 {
 
 public:
 
-    void Init(Board& board) {
+    LocalSqRm_v3& Init(Board& board) {
         board_ = &board;
+        return *this;
     }
 
     void Remove(const Move& m) {

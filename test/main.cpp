@@ -98,6 +98,17 @@ TEST(local_sq_rm, identical) {
     ASSERT_EQ(moves_2, moves_3);
 }
 
+TEST(board_state, _1) {
+    // create random board
+    // start removing from board
+    // make sure that everything is the same in board state
+}
+
+
+TEST(board_state, correctness) {
+    // you want to load a board and check number of sq_loc + what are they
+}
+
 TEST(beam_search, correctness) {
     auto startingSeed = 1;
     auto colorCount = kColorMin;
@@ -108,15 +119,17 @@ TEST(beam_search, correctness) {
     b.Init(g, colorCount, startingSeed);
 
     RNG.seed(0);
-    BeamSearch<LocalSqRm_v2> solver_2;
+    BeamSearch<LocalSqRm_v2> beam;
     // can get a history out of it.. need to use tailing stuff
-    auto res_board = solver_2.Remove(b, kMoveCount, 10);
+    auto res_board = beam.Remove(b, 1000, 10);
+
+    cout << res_board.squares_removed() << endl;
 }
 
 
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
-    //::testing::FLAGS_gtest_filter = "*local_sq_rm*naive*";
+    ::testing::FLAGS_gtest_filter = "*beam*";
     return RUN_ALL_TESTS();
 }

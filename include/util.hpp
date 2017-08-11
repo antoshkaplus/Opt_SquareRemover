@@ -89,7 +89,7 @@ struct Move {
     Direction dir;
     
     Move() {}
-    Move(int row, int col, Direction d) : Move({row, col}, dir) {}
+    Move(int row, int col, Direction d) : Move({row, col}, d) {}
     Move(const Position& p, Direction d)
         : pos(p), dir(d) {}
 

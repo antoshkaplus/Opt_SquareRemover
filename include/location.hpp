@@ -21,7 +21,7 @@ struct  Location {
     char col;
     Combo combo;
 
-    Move toMove() {
+    Move toMove() const {
         switch (combo) {
             case Combo::TopRiTop:
                 return Move(row-1, col+1, kDirDown);
@@ -54,7 +54,7 @@ namespace std {
 template <>
 struct hash<Location> {
     size_t operator()(const Location& x) const {
-        return (x.row << 16) | (x.col << 8) | x.combo;
+        return (x.row << 16) | (x.col << 8) | static_cast<size_t>(x.combo);
     }
 };
 
