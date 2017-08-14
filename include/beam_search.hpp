@@ -8,12 +8,13 @@
 
 #pragma once
 
-#include "board_state.hpp"
+#include "state_sq.hpp"
+#include "state_triple.hpp"
+#include "digit/board_hashed.hpp"
 
 
 template<class LocalSqRm>
 class BeamSearch {
-public:
 
     class Play {
     public:
@@ -37,8 +38,12 @@ public:
             state_.Init(board_);
         }
 
-        auto& state() {
-            return state_;
+        auto& sq_state() const {
+            return sq_state_;
+        }
+
+        auto& triple_state() const {
+            return triple_state_;
         }
 
         auto& board() {
@@ -50,8 +55,9 @@ public:
         }
 
     private:
-        Board board_;
-        BoardState state_;
+        digit::HashedBoard board_;
+        SqState sq_state_;
+        TripleState triple_state_;
     };
 
     class Derivative {
@@ -65,7 +71,7 @@ public:
         : play(&play), move(move), score(score) {}
     };
 
-
+public:
     // client should look at history himself
     Board Remove(const Board& b, int move_count, int beam_width) {
         LocalSqRm local_sq_rm;
@@ -79,15 +85,35 @@ public:
             assert(!current.empty());
             for (auto& play : current) {
                 // takes some time to create everyone of them
+
+                // we need to do this stuff for each move
                 play.state().ForEachSqLoc([&](const Location& loc) {
                     auto m = loc.toMove();
+                    auto triple_count = 0;
+                    auto removed_count = 0;
+                    auto loc_count = 0;
+
+                    Region saved_reg;
+
                     play.board().ForMove(m, [&]() {
+                        // gonna be called with region described
                         local_sq_rm.Init(play.board()).ForRemove(loc.toMove(), [&](const Region& reg) {
                             int sq_move_count = play.state().AfterChangeSqLocs(reg);
                             derivs.emplace_back(play, loc.toMove(), sq_move_count + b.squares_removed());
+
+                            // use some sort of temporary functions.
+                            // this should also work on locations but for that you need to know how many locations on particular region.
+                            // tedious computation. easier to just invalidate / validate, count
+                            play.triple_state().OnRegionChanged(saved_reg = reg);
                         });
                     });
+                    play.triple_state().OnBeforeRegionChanged(saved_reg);
+
+                    triple_count = play.triple_state().triple_count();
+
+                    // and now I need to get to previous state somehow
                 });
+
             }
 
             if (!derivs.empty()) {
@@ -124,7 +150,13 @@ public:
         });
         return res.board();
     }
-    
+
+private:
+    double Score(int sq_removed, int locs, int triples) {
+        return sq_removed + 0.95 * locs + 0.01 * triples;
+    }
+
+
     void SelectDerivatives(vector<Derivative>& bs, Count sz) {
         sz = min(sz, (Count)bs.size());
         nth_element(bs.begin(), bs.begin() + sz - 1, bs.end(), [&](const auto& i_0, const auto& i_1) {

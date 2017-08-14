@@ -1,7 +1,7 @@
 #pragma once
 
 #include "board.hpp"
-#include "board_state.hpp"
+#include "state_sq.hpp"
 #include "local_sq_rm.hpp"
 
 

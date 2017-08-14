@@ -32,13 +32,13 @@ public:
         while (!sqs_.empty()) {
             auto& sq = sqs_.back();
 
-            board_->bit_board_(sq.shifted(1, 1)) = colors_.back();
+            board_->board_(sq.shifted(1, 1)) = colors_.back();
             colors_.pop_back();
-            board_->bit_board_(sq.shifted(1, 0)) = colors_.back();
+            board_->board_(sq.shifted(1, 0)) = colors_.back();
             colors_.pop_back();
-            board_->bit_board_(sq.shifted(1, 0)) = colors_.back();
+            board_->board_(sq.shifted(1, 0)) = colors_.back();
             colors_.pop_back();
-            board_->bit_board_(sq) = colors_.back();
+            board_->board_(sq) = colors_.back();
             colors_.pop_back();
 
             sqs_.pop_back();

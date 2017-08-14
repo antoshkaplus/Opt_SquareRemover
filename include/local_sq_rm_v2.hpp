@@ -55,6 +55,7 @@ public:
         Region rect{p, m.another()};
         eliminate(board_->region().intersection(rect), [&](const Position& p) { board_->Remove(p); });
 
+        // has to be present to make sense
         auto minmax_sq = minmax_element(squares_.begin(), squares_.end(), Position::TopLeftComparator());
 
         auto topleft = min(*(minmax_sq.first), m.pos, Position::TopLeftComparator());

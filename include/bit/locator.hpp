@@ -1,75 +1,18 @@
 #pragma once
 
-#include "util.hpp"
-#include "location.hpp"
 #include "board.hpp"
 
 
-template<class T> class BeamSearch;
+namespace bit {
 
-// need to keep track of Locations to easier know if move valid of not.
-// otherwise have to check sq in 4 locations
-
-// that's a lot
-class BoardState {
-public:
+class Locator {
 
     void Init(const Board& b) {
         board_ = &b;
-        // have to reduce region, otherwise will examine out of board cells.
-        OnRegionChanged(b.region().diffed(1, 1, -2, -2));
-    }
-
-    void OnRegionChanged(const Region& reg) {
-        ValidateSqLocs();
-        UpdateSqLocs(reg);
-    }
-
-    Count AfterChangeSqLocs(const Region& reg) {
-        static vector<std::unordered_map<Location, bool>::iterator> invalidated;
-        // don't have to use iterator
-        for (auto it = sq_locs_.begin(); it != sq_locs_.end(); ++it) {
-            if (!IsValid(it->first)) {
-                it->second = false;
-                invalidated.push_back(it);
-            }
-        }
-        Count diff = sq_locs_.size() - invalidated.size();
-        ForEachNewLocation(reg, [&](const Location& loc) {
-            auto it = sq_locs_.find(loc);
-            if (it == sq_locs_.end() || !it->second) {
-                ++diff;
-            }
-        });
-        for_each(invalidated.begin(), invalidated.end(), [](std::unordered_map<Location, bool>::iterator& it) {
-            it->second = true;
-        });
-        invalidated.clear();
-
-        return diff;
-    }
-
-    bool sq_locs_empty() const {
-        return sq_locs_.empty();
     }
 
     template<class Func>
-    void ForEachSqLoc(Func func) {
-        for (auto loc : sq_locs_) {
-            func(loc.first);
-        }
-    }
-
-private:
-
-    void UpdateSqLocs(const Region& reg) {
-        ForEachNewLocation(reg, [&](const Location& loc) {
-            AddLocation(loc);
-        });
-    }
-
-    template<class Func>
-    void ForEachNewLocation(const Region& reg, Func func) {
+    void ForEachLocation(const Region& reg, Func func) {
         auto cs = [&](auto r, auto c) { return board_->color(r, c); };
         for (auto r = reg.row_begin()-1; r < reg.row_end()+1; ++r) {
             for (auto c = reg.col_begin()-1; c < reg.col_end()+1; ++c) {
@@ -120,18 +63,6 @@ private:
         }
     }
 
-    void AddLocation(const Location& loc) {
-        sq_locs_.emplace(loc, true);
-    }
-
-    void ValidateSqLocs() {
-        for (auto it = sq_locs_.begin(); it != sq_locs_.end();) {
-            if (!IsValid(it->first)) {
-                it = sq_locs_.erase(it);
-            } else ++it;
-        }
-    }
-
     bool IsValid(const Location& loc) {
         auto cs = [&](auto r, auto c) { return board_->color(r, c); };
 
@@ -159,8 +90,8 @@ private:
         }
     }
 
-    std::unordered_map<Location, bool> sq_locs_;
+private:
     const Board* board_;
-
-    template<class T> friend class BeamSearch;
 };
+
+}

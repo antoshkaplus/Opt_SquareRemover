@@ -12,8 +12,10 @@ using namespace ant::grid;
 
 using BitColor = uint8_t;
 using DigitColor = uint8_t;
-using Color = short;
+using Color = uint8_t;
 using Seed = int;
+
+constexpr uint8_t kEmptyColor = 1 << 7;
 
 constexpr Count kColorMin = 4;
 constexpr Count kColorMax = 6;
@@ -211,4 +213,10 @@ inline Problem RandomProblem(Count board_size, Count color_count) {
     }
     res.starting_seed = uniform_int_distribution<>(1)(RNG);
     return res;
+}
+
+
+namespace bit {
+
+
 }
