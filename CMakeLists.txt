@@ -141,6 +141,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 
-add_executable(unittest test/main.cpp)
+file(GLOB UNITTEST_FILES "unittest/*.cpp")
+add_executable(unittest ${UNITTEST_FILES})
 target_link_libraries(unittest square_remover ${GTEST_LIB})
 set_target_properties(unittest PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable -Wno-narrowing")

@@ -13,7 +13,7 @@ public:
 
     void Init(const Grid<Color>& board, Count color_count, Index seed) override {
         digit::Board::Init(board, color_count, seed);
-        hash_function_.reset(new HashFunction(board.size(), color_count));
+        hash_function_.reset(new HashFunction({extended_size(), extended_size()}, color_count));
         auto is_filled = [](const Position& p) { return true; };
         auto getter = [&](const Position& p) {
             return color(p);
@@ -29,6 +29,28 @@ public:
         digit::Board::MakeMove(m);
         h.xorState(&hash_, m.pos, color(m.pos));
         h.xorState(&hash_, p, color(p));
+    }
+
+    template<class Func>
+    void ForMove(const Move& m, Func func) {
+        auto& h = *hash_function_;
+        auto p = m.another();
+        // out
+        h.xorState(&hash_, m.pos, color(m.pos));
+        h.xorState(&hash_, p, color(p));
+        Board::ForMove(m, [&]() {
+            // in
+            h.xorState(&hash_, m.pos, color(m.pos));
+            h.xorState(&hash_, p, color(p));
+            func();
+            // out
+            h.xorState(&hash_, m.pos, color(m.pos));
+            h.xorState(&hash_, p, color(p));
+        });
+        // in
+        h.xorState(&hash_, m.pos, color(m.pos));
+        h.xorState(&hash_, p, color(p));
+
     }
 
     void Remove(const Position& p) override {

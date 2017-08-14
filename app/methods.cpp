@@ -1,3 +1,4 @@
+#include "local_sq_rm_v2.hpp"
 #include "naive.hpp"
 #include "greedy.hpp"
 //#include "wide.hpp"
@@ -57,11 +58,17 @@ std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> boar
 
 std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
     Grid<DigitColor> g = ToColorGrid(board);
-    Board b(g, colors, startingSeed);
+    digit::HashedBoard b;
+    b.Init(g, colors, startingSeed);
     BeamSearch<LocalSqRm_v2> beam;
-    beam.Remove(b, kMoveCount, 10);
+    b = beam.Remove(b, kMoveCount, 10);
 
-    return vector<int>();
+    auto vec = b.move_history();
+    for_each(vec.begin(), vec.end(), [&](Move& p) {
+        p.pos.shift(-1, -1);
+    });
+    assert(vec.size() == kMoveCount);
+    return ToSolution(vec);;
 }
 
 #endif

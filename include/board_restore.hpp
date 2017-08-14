@@ -21,7 +21,7 @@ public:
     void Save(const Position& pos) {
         colors_.push_back(board_->color(pos));
         colors_.push_back(board_->color(pos.shifted(1, 0)));
-        colors_.push_back(board_->color(pos.shifted(1, 0)));
+        colors_.push_back(board_->color(pos.shifted(0, 1)));
         colors_.push_back(board_->color(pos.shifted(1, 1)));
         sqs_.push_back(pos);
     }
@@ -34,7 +34,7 @@ public:
 
             board_->board_(sq.shifted(1, 1)) = colors_.back();
             colors_.pop_back();
-            board_->board_(sq.shifted(1, 0)) = colors_.back();
+            board_->board_(sq.shifted(0, 1)) = colors_.back();
             colors_.pop_back();
             board_->board_(sq.shifted(1, 0)) = colors_.back();
             colors_.pop_back();

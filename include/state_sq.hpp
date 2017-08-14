@@ -19,6 +19,8 @@ public:
     void Init(const Locator& locator) {
         locator_ = &locator;
         // have to reduce region, otherwise will examine out of board cells.
+
+        // could do for the whole region.
         OnRegionChanged(locator_->board().region().diffed(1, 1, -2, -2));
     }
 
@@ -37,7 +39,7 @@ public:
             }
         }
         Count diff = sq_locs_.size() - invalidated.size();
-        locator_->ForEachNewLocation(reg, [&](const Location& loc) {
+        locator_->ForEachLocation(reg, [&](const Location& loc) {
             auto it = sq_locs_.find(loc);
             if (it == sq_locs_.end() || !it->second) {
                 ++diff;
@@ -73,14 +75,14 @@ public:
         }
     }
 
-    bool IsRemoveMove(const Move& m) {
+    bool IsRemoveMove(const Move& m) const {
         return sq_moves_.count(m) > 0;
     }
 
 private:
 
     void UpdateSqLocs(const Region& reg) {
-        locator->ForEachNewLocation(reg, [&](const Location& loc) {
+        locator_->ForEachLocation(reg, [&](const Location& loc) {
             AddLocation(loc);
         });
     }
@@ -88,14 +90,15 @@ private:
 
     void AddLocation(const Location& loc) {
         sq_locs_.emplace(loc, true);
+        assert(locator_->board().region().hasInside(loc.toMove().pos));
         sq_moves_.increase(loc.toMove());
     }
 
     void ValidateSqLocs() {
         for (auto it = sq_locs_.begin(); it != sq_locs_.end();) {
-            if (!locator->IsValid(it->first)) {
-                it = sq_locs_.erase(it);
+            if (!locator_->IsValid(it->first)) {
                 sq_moves_.decrease(it->first.toMove());
+                it = sq_locs_.erase(it);
             } else ++it;
         }
     }

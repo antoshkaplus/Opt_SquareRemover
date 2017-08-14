@@ -13,11 +13,11 @@ public:
         auto func = [&](const Position& p) {
             board_(p.shifted(1, 1)) = board(p);
         };
-        digit_board.ForEachPosition(func);
+        board.ForEachPosition(func);
     }
 
-    virtual void Remove(const Position& p) {
-        seed_ = ReplaceDigitColors(board_, color_count_, p, seed_);
+    virtual void Remove(const Position& p) override {
+        seed_ = ReplaceColors(board_, color_count_, p, seed_);
         ++squares_removed_;
     }
 
@@ -25,7 +25,7 @@ public:
         return color(p_0) == color(p_1) && color(p_1) == color(p_2);
     }
 
-    bool IsSquare(const Position& p) const {
+    bool IsSquare(const Position& p) const override {
         auto &b = board_;
         return b(p.row, p.col) == b(p.row, p.col + 1) && b(p.row, p.col + 1) ==  b(p.row + 1, p.col) && b(p.row + 1, p.col) == b(p.row + 1, p.col + 1);
     }

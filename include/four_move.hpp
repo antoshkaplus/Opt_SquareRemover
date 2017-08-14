@@ -2,7 +2,7 @@
 
 #include "board.hpp"
 #include "state_sq.hpp"
-#include "local_sq_rm.hpp"
+#include "local_sq_rm_v2.hpp"
 
 
 class FourMove {

@@ -138,6 +138,17 @@ struct Move {
     }
 };
 
+namespace std {
+
+template <>
+struct hash<Move> {
+    size_t operator()(const Move& x) const {
+        return x.index();
+    }
+};
+
+}
+
 struct DoubleMove : Move {
     DoubleMove() {}
     DoubleMove(const Move& m, const Move& next)

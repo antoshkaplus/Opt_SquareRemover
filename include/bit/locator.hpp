@@ -6,7 +6,7 @@
 namespace bit {
 
 class Locator {
-
+public:
     void Init(const Board& b) {
         board_ = &b;
     }

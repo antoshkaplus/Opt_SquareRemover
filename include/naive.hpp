@@ -10,7 +10,7 @@
 
 #include "board.hpp"
 
-template<class LocalSqRm>
+template<class Board, class LocalSqRm>
 class NaiveSquareRemover {
 public:
     vector<Move> Solve(Board& b, Count move_count) {

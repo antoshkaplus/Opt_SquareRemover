@@ -51,16 +51,26 @@ public:
         return board_(r, c);
     }
 
-    // if it's practical MakeMove, add method Try
+    vector<Move> move_history() const {
+        return history_->Path();
+    }
+
     virtual void MakeMove(const Move& m) {
-        auto pos_2 = m.pos.Shifted(m.dir);
+        auto pos_2 = m.another();
         assert(region().hasInside(m.pos) && region().hasInside(pos_2));
         swap(board_[m.pos], board_[pos_2]);
+        history_ = make_shared<TrailNode<Move>>(m, history_);
     }
+
+// maybe
+//    virtual void TryMakeMove(const Move& m) {
+//
+//    }
 
     template<class Func>
     void ForMove(const Move& m, Func func) {
-        auto pos_2 = m.pos.Shifted(m.dir);
+        auto pos_2 = m.another();
+        assert(region().hasInside(m.pos) && region().hasInside(pos_2));
         swap(board_[m.pos], board_[pos_2]);
         func();
         swap(board_[m.pos], board_[pos_2]);
@@ -88,6 +98,9 @@ public:
 //        MakeMove(m);
 //        return res;
 //    }
+
+    virtual void Remove(const Position& p) = 0;
+    virtual bool IsSquare(const Position& p) const = 0;
 
 private:
     Direction randomDirection() {
@@ -121,7 +134,11 @@ public:
     const Region sq_region() const {
         return sq_region_;
     }
-    
+
+    const Position origin() const {
+        return region_.position;
+    }
+
     const vector<::Move>& moves() const {
         return *moves_;
     }
@@ -142,15 +159,21 @@ public:
         return seed_;
     }
 
-    bool IsRemoveMove(const Move& m) {
-        ForMove(m, [&]() {
-            if (m.isHorizontal()) {
-
-            }
-        });
+    bool operator==(const Board& b) const {
+        return board_ == b.board_ && seed_ == b.seed_ && squares_removed_ == b.squares_removed_ && history_->value == b.history_->value;
     }
 
-private:
+//    bool IsRemoveMove(const Move& m) {
+//        ForMove(m, [&]() {
+//            if (m.isHorizontal()) {
+//
+//            }
+//        });
+//        return true
+//    }
+
+protected:
+    // should put a lot of stuff to common info.
 
     Region region_;
     Region sq_region_;
@@ -162,6 +185,8 @@ private:
     // this one should not be stored here
     // ore may be computed everytime
     shared_ptr<vector<::Move>> moves_;
+
+    TrailNodePtr<Move> history_;
 
     friend class BoardState;
     friend class BoardRestore;

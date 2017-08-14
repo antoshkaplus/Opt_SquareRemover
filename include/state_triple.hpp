@@ -4,31 +4,41 @@
 
 class TripleState {
 public:
-    void Init(::Board& board) {
-        change_region_ = board_->region();
-        OnRegionChanged();
+    void Init(const ::Board& board) {
+        ResetBoard(board);
+        IncreaseChange(board_->sq_region());
     }
 
-    // too early to substract.
-    // we have incorrect result between Before and After region change
-    void OnBeforeRegionChanged(const Region& reg) {
-        change_region_ = reg;
-        ForEachTriple([&]() { --triple_count_; });
+    void ResetBoard(const ::Board& board) {
+        board_ = &board;
     }
 
-    void OnRegionChanged() {
-        ForEachTriple([&]() { ++triple_count_; });
+    void IncreaseChange(const Region& reg) {
+        ForEachTriple(reg, [&]() { ++triple_count_; });
     }
 
-    Count triple_count() const {
+    void DecreaseChange(const Region& reg) {
+        ForEachTriple(reg, [&]() { --triple_count_; });
+    }
+
+    ant::Count Count(const Region& reg) {
+        auto res = 0;
+        ForEachTriple(reg, [&]() { ++res; });
+        return res;
+    }
+
+    void IncreaseBy(ant::Count count) {
+        triple_count_ += count;
+    }
+
+    ant::Count triple_count() const {
         return triple_count_;
     }
 
 private:
 
     template<class Func>
-    void ForEachTriple(Func func) {
-        auto& reg = change_region_;
+    void ForEachTriple(const Region& reg, Func func) {
         auto cs = [&](auto r, auto c) { return board_->color(r, c); };
 
         // only one possible triple at a time
@@ -57,8 +67,6 @@ private:
         }
     }
 
-
-    Region change_region_;
-    ::Board* board_;
-    Count triple_count_;
+    const ::Board* board_;
+    ant::Count triple_count_ = 0;
 };

@@ -11,7 +11,7 @@
 #include "score_calc.hpp"
 
 
-template<class LocalSqRem>
+template<class Board, class LocalSqRem>
 class Greedy {
     using HashFunction = ZobristHashing<64>;
 
