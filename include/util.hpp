@@ -230,8 +230,17 @@ inline Problem RandomProblem(Count board_size, Count color_count) {
     return res;
 }
 
+constexpr Count kProblemGroupCount = 9;
 
-namespace bit {
+// 4 / 5 / 6
+// 8 9 10 / 11 12 13 / 14 15 16
+inline Index ProblemGroup(Count color_count, Count board_sz) {
+    return (color_count - 4) * 3 + (board_sz - 8) / 3;
+}
 
-
+inline Problem GenerateProblem(Index group) {
+    uniform_int_distribution<> distr(0, 2);
+    auto board_sz = (group % 3) * 3 + 8 + distr(RNG);
+    auto color_count = group / 3 + 4;
+    return RandomProblem(board_sz, color_count);
 }

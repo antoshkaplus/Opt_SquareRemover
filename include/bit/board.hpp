@@ -12,7 +12,7 @@ class Board : public :: Board {
         auto func = [&](const Position& p) {
             board_(p.shifted(1, 1)) = DigitColotToBit(board(p));
         };
-        digit_board.ForEachPosition(func);
+        board.ForEachPosition(func);
     }
 
     void Remove(const Position& p) {

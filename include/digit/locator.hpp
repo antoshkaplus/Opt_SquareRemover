@@ -2,7 +2,7 @@
 
 #include "board.hpp"
 
-template<class T> class BeamSearch;
+template<class T, class Y> class BeamSearch;
 
 namespace digit {
 
@@ -20,11 +20,11 @@ public:
     void ForEachLocation(Region reg, Func func) const {
         // don't want to look at what I don't need
         reg.diff(-1, -1, 2, 2);
-        reg = reg.intersection(board().region().diffed(1, 1, -2, -2));
+        reg = reg.intersection(board().region());
 
         auto cs = [&](auto r, auto c) { return board_->color(r, c); };
-        for (auto r = reg.row_begin()-1; r < reg.row_end()+1; ++r) {
-            for (auto c = reg.col_begin()-1; c < reg.col_end()+1; ++c) {
+        for (auto r = reg.row_begin(); r < reg.row_end(); ++r) {
+            for (auto c = reg.col_begin(); c < reg.col_end(); ++c) {
                 Color color;
                 // x
                 // ox
@@ -108,7 +108,7 @@ public:
 private:
     const Board* board_;
 
-    template<class T>
+    template<class T, class Y>
     friend class BeamSearch;
 };
 

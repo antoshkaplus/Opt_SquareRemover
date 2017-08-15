@@ -5,7 +5,7 @@
 #include "board.hpp"
 
 
-template<class T> class BeamSearch;
+template<class T, class Y> class BeamSearch;
 
 // need to keep track of Locations to easier know if move valid of not.
 // otherwise have to check sq in 4 locations
@@ -21,7 +21,7 @@ public:
         // have to reduce region, otherwise will examine out of board cells.
 
         // could do for the whole region.
-        OnRegionChanged(locator_->board().region().diffed(1, 1, -2, -2));
+        OnRegionChanged(locator_->board().region());
     }
 
     void OnRegionChanged(const Region& reg) {
@@ -31,7 +31,7 @@ public:
     }
 
     Count AfterChangeSqLocs(const Region& reg) {
-        static vector<std::unordered_map<Location, bool>::iterator> invalidated;
+        invalidated.clear();
         // don't have to use iterator
         for (auto it = sq_locs_.begin(); it != sq_locs_.end(); ++it) {
             if (!locator_->IsValid(it->first)) {
@@ -104,9 +104,13 @@ private:
         }
     }
 
+    // needed for one method
+    // can't make static due to parallel use
+    vector<std::unordered_map<Location, bool>::iterator> invalidated;
+
     CountMap<Move, UnorderedMap> sq_moves_;
     std::unordered_map<Location, bool> sq_locs_;
     const Locator* locator_;
 
-    template<class T> friend class BeamSearch;
+    template<class T, class Y> friend class BeamSearch;
 };

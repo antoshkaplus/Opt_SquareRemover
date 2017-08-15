@@ -120,13 +120,23 @@ target_link_libraries(wrong_tester square_remover)
 set_target_properties(wrong_tester PROPERTIES COMPILE_FLAGS "-Wno-logical-op-parentheses -Wno-unused-const-variable")
 
 
+find_library(TBB_LIB tbb)
+if (NOT GTEST_LIB)
+    message(FATAL_ERROR "tbb library not found")
+endif()
+
+add_executable(opt "app/opt.cpp")
+target_link_libraries(opt square_remover ${TBB_LIB})
+set_target_properties(opt PROPERTIES COMPILE_FLAGS "-Wno-narrowing")
+
+
 find_library(GTEST_LIB gtest)
 if (NOT GTEST_LIB)
     message(FATAL_ERROR "gtest library not found")
 endif()
 
 add_executable(tester "app/tester_template.cpp")
-target_link_libraries(tester square_remover ${GTEST_LIB} )
+target_link_libraries(tester square_remover ${GTEST_LIB})
 
 
 find_library(GBENCHMARK_LIBRARY benchmark)

@@ -31,7 +31,9 @@ public:
 
     bool IsSquare(const Position& p) const override {
         auto &b = board_;
-        return b(p.row, p.col) == b(p.row, p.col + 1) && b(p.row, p.col + 1) ==  b(p.row + 1, p.col) && b(p.row + 1, p.col) == b(p.row + 1, p.col + 1);
+        return b(p.row, p.col) == b(p.row, p.col + 1) &&
+                b(p.row, p.col + 1) ==  b(p.row + 1, p.col) &&
+                b(p.row + 1, p.col) == b(p.row + 1, p.col + 1);
     }
 
     void Print(ostream& out) const {

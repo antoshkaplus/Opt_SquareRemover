@@ -1,8 +1,11 @@
+#include "local_sq_rm_v1.hpp"
 #include "local_sq_rm_v2.hpp"
 #include "naive.hpp"
 #include "greedy.hpp"
 //#include "wide.hpp"
 #include "beam_search.hpp"
+#include "score.hpp"
+#include "factors.hpp"
 
 
 class SquareRemover {
@@ -14,10 +17,10 @@ public:
 
 std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
     Grid<Color> g = ToColorGrid(board);
-    Board b;
+    digit::Board b;
     b.Init(g, colors, startingSeed);
 
-    NaiveSquareRemover naive;
+    NaiveSquareRemover<digit::Board, LocalSqRm_v2> naive;
     auto moves = naive.Solve(b, kMoveCount);
     return ToSolution(moves);
 }
@@ -60,15 +63,14 @@ std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> boar
     Grid<DigitColor> g = ToColorGrid(board);
     digit::HashedBoard b;
     b.Init(g, colors, startingSeed);
-    BeamSearch<LocalSqRm_v2> beam;
-    b = beam.Remove(b, kMoveCount, 10);
+    BeamSearch<LocalSqRm_v2, Score_v1> beam;
+    Index group = ProblemGroup(colors, board.size());
+    Score_v1 s(kLocFactors[group], kTripleFactors[group]);
+    b = beam.Remove(b, kMoveCount, 16 * 16 * 100 / (board.size()*board.size()));
 
     auto vec = b.move_history();
-    for_each(vec.begin(), vec.end(), [&](Move& p) {
-        p.pos.shift(-1, -1);
-    });
     assert(vec.size() == kMoveCount);
-    return ToSolution(vec);;
+    return ToSolution(vec);
 }
 
 #endif

@@ -14,7 +14,7 @@
 #include "digit/locator.hpp"
 
 
-template<class LocalSqRm>
+template<class LocalSqRm, class Score>
 class BeamSearch {
 
     using Board = digit::HashedBoard;
@@ -92,7 +92,8 @@ class BeamSearch {
 
 public:
     // client should look at history himself
-    Board Remove(const Board& b, int move_count, int beam_width) {
+    Board Remove(Board b, int move_count, int beam_width) {
+        local_sq_rm_.Init(b).Eliminate();
 
         vector<Play> current;
         vector<Play> next;
@@ -100,8 +101,8 @@ public:
         vector<Derivative> derivs;
         current.emplace_back(b);
 
-        auto addSqLocs = std::bind(&BeamSearch<LocalSqRm>::AddSqLocDerivs, this, placeholders::_1, std::ref(derivs));
-        auto addSimple = std::bind(&BeamSearch<LocalSqRm>::AddSimpleDerivs, this, placeholders::_1, std::ref(derivs));
+        auto addSqLocs = std::bind(&BeamSearch<LocalSqRm, Score>::AddSqLocDerivs, this, placeholders::_1, std::ref(derivs));
+        auto addSimple = std::bind(&BeamSearch<LocalSqRm, Score>::AddSimpleDerivs, this, placeholders::_1, std::ref(derivs));
 
         for (int i = 0; i < move_count; ++i) {
             board_hash_.clear();
@@ -139,6 +140,10 @@ public:
         return res.board();
     }
 
+    void set_score(const Score& score) {
+        score_ = score;
+    }
+
 private:
 
     void AddSqLocDerivs(Play& play, vector<Derivative>& derivs) {
@@ -173,7 +178,7 @@ private:
 
             triple_diff_before = play.triple_state().Count(rem_reg);
 
-            auto score = Score(sq_removed, sq_loc_count, play.triple_state().triple_count() - triple_diff_before + triple_diff_after);
+            auto score = score_(sq_removed, sq_loc_count, play.triple_state().triple_count() - triple_diff_before + triple_diff_after);
             derivs.emplace_back(play, m, score, triple_diff_before + triple_diff_after);
         });
     }
@@ -205,13 +210,9 @@ private:
 
             if (exists) continue;
 
-            auto score = Score(sq_removed, sq_move_count, play.triple_state().triple_count() - triple_diff_before + triple_diff_after);
+            auto score = score_(sq_removed, sq_move_count, play.triple_state().triple_count() - triple_diff_before + triple_diff_after);
             derivs.emplace_back(play, m, score, triple_diff_before + triple_diff_after);
         }
-    }
-
-    double Score(int sq_removed, int locs, int triples) {
-        return sq_removed + 0.95 * locs + 0.01 * triples;
     }
 
     void SelectDerivatives(vector<Derivative>& bs, Count sz) {
@@ -222,6 +223,7 @@ private:
         bs.resize(sz);
     }
 
+    Score score_;
     LocalSqRm local_sq_rm_;
     unordered_set<Board::HashFunction::value> board_hash_;
 };

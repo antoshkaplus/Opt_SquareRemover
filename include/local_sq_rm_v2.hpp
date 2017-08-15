@@ -47,45 +47,19 @@ public:
     }
 
     Region Remove(const Move& m) {
-        squares_.clear();
-
-        auto ind = Indent{1,1};
-        auto p = m.pos - ind;
-
-        Region rect{p, m.another()};
-        eliminate(board_->region().intersection(rect), [&](const Position& p) { board_->Remove(p); });
-
-        // has to be present to make sense
-        auto minmax_sq = minmax_element(squares_.begin(), squares_.end(), Position::TopLeftComparator());
-
-        auto topleft = min(*(minmax_sq.first), m.pos, Position::TopLeftComparator());
-        auto botright = max(minmax_sq.second->shifted(1, 1), m.another(), Position::TopLeftComparator());
-
-        return Region(topleft, botright);
+        return Remove(m, [&](const Position& p) { board_->Remove(p); });
     }
 
     template<class Func>
     void ForRemove(const Move& m, Func func) {
-        squares_.clear();
-
-        auto ind = Indent{1,1};
-        auto p = m.pos - ind;
-
-        Region rect{p, m.another()};
-
         board_restore_.Init(*board_);
 
-        eliminate(board_->region().intersection(rect), [&](const Position& p) {
+        auto reg = Remove(m, [&](const Position& p) {
             board_restore_.Save(p);
             board_->Remove(p);
         });
 
-        auto minmax_sq = minmax_element(squares_.begin(), squares_.end(), Position::TopLeftComparator());
-
-        auto topleft = min(*(minmax_sq.first), m.pos, Position::TopLeftComparator());
-        auto botright = max(minmax_sq.second->shifted(1, 1), m.another(), Position::TopLeftComparator());
-
-        func(Region(topleft, botright));
+        func(reg);
 
         board_restore_.Restore();
     }
@@ -101,6 +75,29 @@ public:
     }
 
 private:
+
+    template<class OnSquareFound>
+    Region Remove(const Move& m, OnSquareFound on_square_found) {
+        squares_.clear();
+
+        Region rect{m.pos.shifted(-1,-1), m.another()};
+        eliminate(board_->region().intersection(rect), on_square_found);
+
+        // has to be present to make sense
+        if (squares_.empty()) {
+            return {m.pos, m.another()};
+        } else {
+            auto comp = Position::TopLeftComparator();
+
+            auto minmax_sq = minmax_element(squares_.begin(), squares_.end(), comp);
+            auto topleft = min(*(minmax_sq.first), m.pos, comp);
+            auto botright = max(minmax_sq.second->shifted(1, 1), m.another(), comp);
+
+            return Region(topleft, botright);
+        }
+    }
+
+
     Board *board_;
     BoardRestore board_restore_;
     priority_queue <Position, vector<Position>, Position::BottomRightComparator> heap_;

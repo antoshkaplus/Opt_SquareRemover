@@ -14,20 +14,19 @@ template<class Board, class LocalSqRm>
 class NaiveSquareRemover {
 public:
     vector<Move> Solve(Board& b, Count move_count) {
-        vector<Move> res;
-        // reuse object. less allocations
         Board new_b;
         LocalSqRm local;
+
+        local.Init(b).Eliminate();
         for (Index i = 0; i < move_count; ++i) {
-            
+
             vector<Move> best_ms;
             Count best_sq_rm = -1;
 
-            local.Init(new_b);
             for (auto& m : b.moves()) {
                 new_b = b;
                 new_b.MakeMove(m);
-                local.Remove(m);
+                local.Init(new_b).Remove(m);
                 auto new_sq_rm = new_b.squares_removed();
                 if (new_sq_rm == best_sq_rm) {
                     best_ms.push_back(m);
@@ -37,17 +36,15 @@ public:
                     best_sq_rm = new_sq_rm;
                 }
             }
-            
+
             uniform_int_distribution<> distr(0, best_ms.size()-1);
             Index k = distr(RNG);
             b.MakeMove(best_ms[k]);
-            res.push_back(best_ms[k]);
             if (best_sq_rm != 0) {
-                local.Init(b);
-                local.Remove(best_ms[k]);
+                local.Init(b).Remove(best_ms[k]);
             }
         }
-        return res;
+        return b.move_history();
     }
 
 

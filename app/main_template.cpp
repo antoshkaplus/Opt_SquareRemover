@@ -56,9 +56,14 @@ int main(int argc, const char * argv[]) {
     Timer timer(30000);
     SquareRemover solver;
     auto v = solver.playIt(problem.color_count, problem.board, problem.starting_seed);
+    cerr << "done" << endl;
     if (timed && timer.timeout()) {
         std::cerr << "timeout";
         return 0;
+    }
+    for (Index i = 0; i < v.size(); i+=3) {
+        --v[i];
+        --v[i+1];
     }
     WriteSolution(*out, v);
     return 0;

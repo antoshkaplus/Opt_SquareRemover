@@ -23,7 +23,7 @@ public:
     
     virtual void Init(const Grid<DigitColor>& board, Count color_count, Index seed) {
         region_ = Region(1, 1, board.size().row, board.size().col);
-        sq_region_ = Region(1, 1, board.size().row-1, board.size().col);
+        sq_region_ = Region(1, 1, board.size().row-1, board.size().col-1);
 
         board_.resize(board.size().row+2, board.size().col+2);
         board_.fill(kEmptyColor);
@@ -80,22 +80,23 @@ public:
         return color(m.pos) == color(m.another());
     }
     
-//    bool IsKillerMove(const Move& m) {
-//        MakeMove(m);
-//        array<Position, 4> ps;
-//        if (m.isVertical()) {
-//            ps = {{ m.pos.shifted(-1, -1),
-//                    m.pos.shifted(-1, 0),
-//                    m.another().shifted(0, -1),
-//                    m.another() }};
-//        } else {
-//            ps = {{ m.pos.shifted(-1, -1),
-//                    m.pos.shifted(0, -1),
-//                    m.another().shifted(-1, 0),
-//                    m.another() }};
-//        }
-//        bool res = std::any_of(ps.begin(), ps.end(), std::bind(&Board::IsSquare, this, std::placeholders::_1));
-//        MakeMove(m);
+//    bool IsRemoveMove(const Move& m) {
+//        auto res = false;
+//        ForMove(m, [&]() {
+//            array<Position, 4> ps;
+//            if (m.isVertical()) {
+//                ps = {{ m.pos.shifted(-1, -1),
+//                      m.pos.shifted(-1, 0),
+//                      m.another().shifted(0, -1),
+//                      m.another() }};
+//            } else {
+//                ps = {{ m.pos.shifted(-1, -1),
+//                      m.pos.shifted(0, -1),
+//                      m.another().shifted(-1, 0),
+//                      m.another() }};
+//            }
+//            bool res = std::any_of(ps.begin(), ps.end(), std::bind(&Board::IsSquare, this, std::placeholders::_1));
+//        });
 //        return res;
 //    }
 
@@ -163,6 +164,9 @@ public:
         return board_ == b.board_ && seed_ == b.seed_ && squares_removed_ == b.squares_removed_ && history_->value == b.history_->value;
     }
 
+    bool operator!=(const Board& b) const {
+        return !(*this == b);
+    }
 //    bool IsRemoveMove(const Move& m) {
 //        ForMove(m, [&]() {
 //            if (m.isHorizontal()) {

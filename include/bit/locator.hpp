@@ -1,6 +1,7 @@
 #pragma once
 
 #include "board.hpp"
+#include "location.hpp"
 
 
 namespace bit {
@@ -12,10 +13,13 @@ public:
     }
 
     template<class Func>
-    void ForEachLocation(const Region& reg, Func func) {
+    void ForEachLocation(Region reg, Func func) {
+        reg.diff(-1, -1, 2, 2);
+        reg = reg.intersection(board().region().diffed(1, 1, -2, -2));
+
         auto cs = [&](auto r, auto c) { return board_->color(r, c); };
-        for (auto r = reg.row_begin()-1; r < reg.row_end()+1; ++r) {
-            for (auto c = reg.col_begin()-1; c < reg.col_end()+1; ++c) {
+        for (auto r = reg.row_begin(); r < reg.row_end(); ++r) {
+            for (auto c = reg.col_begin(); c < reg.col_end(); ++c) {
                 char color;
                 // x
                 // ox
@@ -88,6 +92,10 @@ public:
             default:
                 throw runtime_error("unknown Combo");
         }
+    }
+
+    const Board& board() const {
+        return *board_;
     }
 
 private:
