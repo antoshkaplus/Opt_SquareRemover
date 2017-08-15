@@ -27,6 +27,7 @@ public:
     void OnRegionChanged(const Region& reg) {
         ValidateSqLocs();
         UpdateSqLocs(reg);
+        assert(sq_locs_.size() == sq_moves_.Total());
     }
 
     Count AfterChangeSqLocs(const Region& reg) {
@@ -89,9 +90,9 @@ private:
 
 
     void AddLocation(const Location& loc) {
-        sq_locs_.emplace(loc, true);
+        auto p = sq_locs_.emplace(loc, true);
         assert(locator_->board().region().hasInside(loc.toMove().pos));
-        sq_moves_.increase(loc.toMove());
+        if (p.second) sq_moves_.increase(loc.toMove());
     }
 
     void ValidateSqLocs() {

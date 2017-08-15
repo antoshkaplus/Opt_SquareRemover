@@ -138,6 +138,10 @@ struct Move {
     }
 };
 
+inline ostream& operator<<(ostream& out, const Move& m) {
+    return out << "(" << m.pos.row << "," << m.pos.col << "," << m.dir << ")";
+}
+
 namespace std {
 
 template <>

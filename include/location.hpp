@@ -48,6 +48,9 @@ constexpr bool operator==(const Location& loc_0, const Location& loc_1) {
     return loc_0.row == loc_1.row && loc_0.col == loc_1.col && loc_0.combo == loc_1.combo;
 }
 
+inline ostream& operator<<(ostream& out, const Location& loc) {
+    return out << "(" << (int)loc.row << ","<< (int)loc.col << "," << (int)loc.combo << ")";
+}
 
 namespace std {
 

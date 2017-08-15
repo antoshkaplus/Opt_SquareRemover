@@ -25,6 +25,10 @@ public:
         return color(p_0) == color(p_1) && color(p_1) == color(p_2);
     }
 
+    bool IsFour(const Position p_0, const Position& p_1, const Position& p_2, const Position& p_3) const {
+        return color(p_0) == color(p_1) && color(p_1) == color(p_2) && color(p_2) == color(p_3);
+    }
+
     bool IsSquare(const Position& p) const override {
         auto &b = board_;
         return b(p.row, p.col) == b(p.row, p.col + 1) && b(p.row, p.col + 1) ==  b(p.row + 1, p.col) && b(p.row + 1, p.col) == b(p.row + 1, p.col + 1);

@@ -1,5 +1,4 @@
 
-#include <beam_search.hpp>
 #include "gtest/gtest.h"
 
 #include "util.hpp"
@@ -8,6 +7,7 @@
 #include "naive.hpp"
 #include "greedy.hpp"
 #include "digit/board_hashed.hpp"
+#include "beam_search.hpp"
 
 
 vector<string> b = {

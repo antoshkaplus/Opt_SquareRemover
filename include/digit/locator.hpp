@@ -77,27 +77,25 @@ public:
     }
 
     bool IsValid(const Location& loc) const {
-        auto cs = [&](auto r, auto c) { return board_->color(r, c); };
-
         auto r = loc.row;
         auto c = loc.col;
         switch (loc.combo) {
             case Combo::BotRiBot:
-                return cs(r,c) == (cs(r,c+1)&cs(r+1,c)&cs(r+2,c+1));
+                return board_->IsFour({r,c}, {r,c+1}, {r+1,c}, {r+2,c+1});
             case Combo::TopRiTop:
-                return cs(r,c) == (cs(r-1,c+1)&cs(r+1,c)&cs(r+1,c+1));
+                return board_->IsFour({r,c}, {r-1,c+1}, {r+1,c}, {r+1,c+1});
             case Combo::TopLeLe:
-                return cs(r,c-1) == (cs(r,c+1)&cs(r+1,c)&cs(r+1,c+1));
+                return board_->IsFour({r,c-1}, {r,c+1}, {r+1,c}, {r+1,c+1});
             case Combo::TopRiRi:
-                return cs(r,c) == (cs(r,c+2)&cs(r+1,c)&cs(r+1,c+1));
+                return board_->IsFour({r,c}, {r,c+2}, {r+1,c}, {r+1,c+1});
             case Combo::TopLeTop:
-                return cs(r-1,c) == (cs(r,c+1)&cs(r+1,c)&cs(r+1,c+1));
+                return board_->IsFour({r-1,c}, {r,c+1}, {r+1,c}, {r+1,c+1});
             case Combo::BotLeBot:
-                return cs(r,c) == (cs(r,c+1)&cs(r+2,c)&cs(r+1,c+1));
+                return board_->IsFour({r,c}, {r,c+1}, {r+2,c}, {r+1,c+1});
             case Combo::BotLeLe:
-                return cs(r,c) == (cs(r,c+1)&cs(r+1,c-1)&cs(r+1,c+1));
+                return board_->IsFour({r,c}, {r,c+1}, {r+1,c-1}, {r+1,c+1});
             case Combo::BotRiRi:
-                return cs(r,c) == (cs(r,c+1)&cs(r+1,c)&cs(r+1,c+2));
+                return board_->IsFour({r,c}, {r,c+1}, {r+1,c}, {r+1,c+2});
             default:
                 throw runtime_error("unknown Combo");
         }
