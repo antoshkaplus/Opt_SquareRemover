@@ -6,7 +6,7 @@ class TripleState {
 public:
     void Init(const ::Board& board) {
         ResetBoard(board);
-        IncreaseChange(board_->sq_region());
+        IncreaseChange(board_->region());
     }
 
     void ResetBoard(const ::Board& board) {
