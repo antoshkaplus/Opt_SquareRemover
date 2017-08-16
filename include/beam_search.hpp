@@ -10,8 +10,10 @@
 
 #include "state_sq.hpp"
 #include "state_triple.hpp"
+#include "state_double.hpp"
 #include "digit/board_hashed.hpp"
 #include "digit/locator.hpp"
+#include "play.hpp"
 
 
 template<class LocalSqRm, class Score>
@@ -19,75 +21,17 @@ class BeamSearch {
 
     using Board = digit::HashedBoard;
 
-    class Play {
-    public:
-        Play() {}
-        Play(const Board& b) {
-            Init(b);
-        }
-        Play(const Play& p) {
-            *this = p;
-        }
-
-        const Play& operator=(const Play& play) {
-            board_ = play.board_;
-            locator_ = play.locator_;
-            locator_.ResetBoard(board_);
-            sq_state_ = play.sq_state_;
-            sq_state_.locator_ = &locator_;
-            triple_state_ = play.triple_state_;
-            triple_state_.ResetBoard(board_);
-            return *this;
-        }
-
-        void Init(const Board& b) {
-            board_ = b;
-            locator_.Init(b);
-            sq_state_.Init(locator_);
-            triple_state_.Init(board_);
-        }
-
-        auto& sq_state() const {
-            return sq_state_;
-        }
-
-        auto& sq_state() {
-            return sq_state_;
-        }
-
-        auto& triple_state() const {
-            return triple_state_;
-        }
-
-        auto& triple_state() {
-            return triple_state_;
-        }
-
-        auto& board() {
-            return board_;
-        }
-
-        auto& board() const {
-            return board_;
-        }
-
-    private:
-        digit::Locator locator_;
-        Board board_;
-        SqState<digit::Locator> sq_state_;
-        TripleState triple_state_;
-    };
-
     class Derivative {
     public:
         const Play* play;
         Move move;
         double score;
         Count triple_diff;
+        Count double_diff;
 
         Derivative() {}
-        Derivative(const Play& play, const Move& move, double score=0, Count triple_diff=0)
-        : play(&play), move(move), score(score), triple_diff(triple_diff) {}
+        Derivative(const Play& play, const Move& move, double score=0, Count triple_diff=0, Count double_diff=0)
+        : play(&play), move(move), score(score), triple_diff(triple_diff), double_diff(double_diff) {}
     };
 
 public:
@@ -125,6 +69,7 @@ public:
                 auto reg = local_sq_rm_.Init(next.back().board()).Remove(d.move);
                 next.back().sq_state().OnRegionChanged(reg);
                 next.back().triple_state().IncreaseBy(d.triple_diff);
+                next.back().double_state().IncreaseBy(d.double_diff);
 
             });
             derivs.clear();
@@ -151,6 +96,8 @@ private:
 
             Count triple_diff_before;
             Count triple_diff_after;
+            Count double_diff_before;
+            Count double_diff_after;
             Count sq_removed = 0;
             Count sq_loc_count;
 
@@ -170,6 +117,7 @@ private:
 
                         sq_loc_count = play.sq_state().AfterChangeSqLocs(reg);
                         triple_diff_after = play.triple_state().Count(reg);
+                        double_diff_after = play.double_state().Count(reg);
                         sq_removed = play.board().squares_removed();
                     }
                 });
@@ -177,9 +125,12 @@ private:
             if (exists) return;
 
             triple_diff_before = play.triple_state().Count(rem_reg);
+            double_diff_before = play.double_state().Count(rem_reg);
 
-            auto score = score_(sq_removed, sq_loc_count, play.triple_state().triple_count() - triple_diff_before + triple_diff_after);
-            derivs.emplace_back(play, m, score, triple_diff_before + triple_diff_after);
+            auto score = score_(sq_removed, sq_loc_count, 
+                                play.triple_state().triple_count() - triple_diff_before + triple_diff_after,
+                                play.double_state().double_count() - double_diff_before + double_diff_after);
+            derivs.emplace_back(play, m, score, - triple_diff_before + triple_diff_after,- double_diff_before + double_diff_after);
         });
     }
 
@@ -191,6 +142,8 @@ private:
 
             Count triple_diff_before = play.triple_state().Count(reg);
             Count triple_diff_after;
+            Count double_diff_before = play.double_state().Count(reg);
+            Count double_diff_after;
             Count sq_move_count;
             Count sq_removed;
 
@@ -204,14 +157,17 @@ private:
 
                     sq_move_count = play.sq_state().AfterChangeSqLocs(reg);
                     triple_diff_after = play.triple_state().Count(reg);
+                    double_diff_after = play.double_state().Count(reg);
                     sq_removed = play.board().squares_removed();
                 }
             });
 
             if (exists) continue;
 
-            auto score = score_(sq_removed, sq_move_count, play.triple_state().triple_count() - triple_diff_before + triple_diff_after);
-            derivs.emplace_back(play, m, score, triple_diff_before + triple_diff_after);
+            auto score = score_(sq_removed, sq_move_count, 
+                                play.triple_state().triple_count() - triple_diff_before + triple_diff_after,
+                                play.double_state().double_count() - double_diff_before + double_diff_after);
+            derivs.emplace_back(play, m, score, - triple_diff_before + triple_diff_after, - double_diff_before + double_diff_after);
         }
     }
 

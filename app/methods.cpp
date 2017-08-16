@@ -65,7 +65,7 @@ std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> boar
     b.Init(g, colors, startingSeed);
     BeamSearch<LocalSqRm_v2, Score_v1> beam;
     Index group = ProblemGroup(colors, board.size());
-    Score_v1 s(kLocFactors[group], kTripleFactors[group]);
+    Score_v1 s(kLocFactors[group], 0, 0);
     b = beam.Remove(b, kMoveCount, 16 * 16 * 100 / (board.size()*board.size()));
 
     auto vec = b.move_history();

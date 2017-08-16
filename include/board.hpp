@@ -103,6 +103,7 @@ public:
     virtual void Remove(const Position& p) = 0;
     virtual bool IsSquare(const Position& p) const = 0;
     virtual bool IsFour(const Position& p_1, const Position& p_2, const Position& p_3, const Position& p_4) const = 0;
+    virtual bool IsTriple(const Position& p_1, const Position& p_2, const Position& p_3) const = 0;
 
 private:
     Direction randomDirection() {

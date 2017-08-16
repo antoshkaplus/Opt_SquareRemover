@@ -1,5 +1,5 @@
 #
-# test is actually depends on google test
+# benchmark is actually depends on google benchmark
 #
 
 # macros
@@ -144,10 +144,13 @@ if (NOT GBENCHMARK_LIBRARY)
     message(FATAL_ERROR "benchmark library not found")
 endif()
 
-add_executable(benchmark test/main_benchmark.cpp)
-target_link_libraries(benchmark ${GBENCHMARK_LIBRARY})
+
+file(GLOB BENCHMARK_FILES "benchmark/*.cpp")
+add_executable(bench ${BENCHMARK_FILES})
+target_link_libraries(bench square_remover ${GBENCHMARK_LIBRARY})
+set_target_properties(bench PROPERTIES COMPILE_FLAGS "-Wno-narrowing")
 if(UNIX AND NOT APPLE)
-    target_link_libraries(benchmark pthread)
+    target_link_libraries(bench pthread)
 endif()
 
 

@@ -21,11 +21,11 @@ public:
         ++squares_removed_;
     }
 
-    bool IsTriple(const Position p_0, const Position& p_1, const Position& p_2) const {
+    bool IsTriple(const Position& p_0, const Position& p_1, const Position& p_2) const {
         return color(p_0) == color(p_1) && color(p_1) == color(p_2);
     }
 
-    bool IsFour(const Position p_0, const Position& p_1, const Position& p_2, const Position& p_3) const {
+    bool IsFour(const Position& p_0, const Position& p_1, const Position& p_2, const Position& p_3) const override {
         return color(p_0) == color(p_1) && color(p_1) == color(p_2) && color(p_2) == color(p_3);
     }
 
