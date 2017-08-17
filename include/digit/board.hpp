@@ -21,7 +21,7 @@ public:
         ++squares_removed_;
     }
 
-    bool IsTriple(const Position& p_0, const Position& p_1, const Position& p_2) const {
+    bool IsTriple(const Position& p_0, const Position& p_1, const Position& p_2) const override {
         return color(p_0) == color(p_1) && color(p_1) == color(p_2);
     }
 

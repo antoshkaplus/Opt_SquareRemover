@@ -1,7 +1,7 @@
 #pragma once
 
 class _2_SqState_v2 {
-
+public:
 
     void OnRegionChanged() {
 
@@ -10,6 +10,9 @@ class _2_SqState_v2 {
 
     }
 
+private:
+
+    // it's much bigger than you think
     template<class Func>
     void ForEachMove(void Region& reg, Func func) {
         reg.diffed(-1, 0, 1, 0).ForEach([&](const Position& p) {

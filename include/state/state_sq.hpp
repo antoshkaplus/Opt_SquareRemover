@@ -24,6 +24,10 @@ public:
         OnRegionChanged(locator_->board().region());
     }
 
+    void ResetLocator(const Locator& locator) {
+        locator_ = &locator;
+    }
+
     void OnRegionChanged(const Region& reg) {
         ValidateSqLocs();
         UpdateSqLocs(reg);

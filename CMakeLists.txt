@@ -21,6 +21,7 @@ project (SquareRemover)
 
 list(APPEND CMAKE_CXX_FLAGS "-std=c++1y -Wall -Werror -Wno-sign-compare -Wno-char-subscripts  -Wno-error=char-subscripts -Wno-macro-redefined -Wno-unused-const-variable")
 
+
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 
@@ -54,7 +55,7 @@ endif()
 file(GLOB SQUARE_REMOVER_FILES "./src/*" "./include/*")
 add_library(square_remover ${SQUARE_REMOVER_FILES})
 target_link_libraries(square_remover ${ANT_LIBRARY})
-set_target_properties(square_remover PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable")
+set_target_properties(square_remover PROPERTIES COMPILE_FLAGS " -Wno-unused-variable")
 
 add_executable(square_remover_app "./app/app.cpp")
 target_link_libraries(square_remover_app square_remover)
@@ -91,7 +92,7 @@ set_target_properties(four_move PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-va
 add_executable(beam app/methods.cpp app/main_template.cpp)
 target_link_libraries(beam square_remover)
 target_compile_definitions(beam PUBLIC -DSQR_REM_BEAM)
-set_target_properties(beam PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable -Wno-unused-variable -Wno-narrowing")
+set_target_properties(beam PROPERTIES COMPILE_FLAGS " -Wno-unused-variable -Wno-narrowing")
 
 
 # others

@@ -13,25 +13,20 @@
 #include "state_double.hpp"
 #include "digit/board_hashed.hpp"
 #include "digit/locator.hpp"
-#include "play.hpp"
+#include "play/play_v1.hpp"
 
 
-template<class LocalSqRm, class Score>
+template<class LocalSqRm, class Play>
 class BeamSearch {
 
     using Board = digit::HashedBoard;
+    using PlayDeriv = typename Play::Deriv;
 
-    class Derivative {
-    public:
-        const Play* play;
-        Move move;
-        double score;
-        Count triple_diff;
-        Count double_diff;
+    struct Deriv : PlayDeriv {
+        Deriv(const Play& play, const PlayDeriv& deriv)
+            : PlayDeriv(deriv), play(play) {}
 
-        Derivative() {}
-        Derivative(const Play& play, const Move& move, double score=0, Count triple_diff=0, Count double_diff=0)
-        : play(&play), move(move), score(score), triple_diff(triple_diff), double_diff(double_diff) {}
+        Play* play;
     };
 
 public:
@@ -42,34 +37,24 @@ public:
         vector<Play> current;
         vector<Play> next;
         vector<Play> bs;
-        vector<Derivative> derivs;
+        vector<Deriv> derivs;
         current.emplace_back(b);
-
-        auto addSqLocs = std::bind(&BeamSearch<LocalSqRm, Score>::AddSqLocDerivs, this, placeholders::_1, std::ref(derivs));
-        auto addSimple = std::bind(&BeamSearch<LocalSqRm, Score>::AddSimpleDerivs, this, placeholders::_1, std::ref(derivs));
 
         for (int i = 0; i < move_count; ++i) {
             board_hash_.clear();
 
-            for_each(current.begin(), current.end(), addSqLocs);
-
-            if (derivs.empty()) {
-
-                for_each(current.begin(), current.end(), addSimple);
-
-                if (derivs.empty()) throw runtime_error("unable to find derivatives");
-            }
+            for_each(current.begin(), current.end(), [&](const Play& p) {
+                p.ForEachDeriv([&](const PlayDeriv& d) {
+                    derivs.emplace_back(p, d);
+                });
+            });
 
             SelectDerivatives(derivs, beam_width);
 
             for_each(derivs.begin(), derivs.end(), [&](auto& d) {
 
                 next.push_back(*(d.play));
-                next.back().board().MakeMove(d.move);
-                auto reg = local_sq_rm_.Init(next.back().board()).Remove(d.move);
-                next.back().sq_state().OnRegionChanged(reg);
-                next.back().triple_state().IncreaseBy(d.triple_diff);
-                next.back().double_state().IncreaseBy(d.double_diff);
+                next.back().Apply(d);
 
             });
             derivs.clear();
@@ -85,93 +70,9 @@ public:
         return res.board();
     }
 
-    void set_score(const Score& score) {
-        score_ = score;
-    }
-
 private:
 
-    void AddSqLocDerivs(Play& play, vector<Derivative>& derivs) {
-        play.sq_state().ForEachSqMove([&](const Move& m) {
-
-            Count triple_diff_before;
-            Count triple_diff_after;
-            Count double_diff_before;
-            Count double_diff_after;
-            Count sq_removed = 0;
-            Count sq_loc_count;
-
-            Region rem_reg;
-
-            bool exists = false;
-
-            play.board().ForMove(m, [&]() {
-                // gonna be called with region described
-                local_sq_rm_.Init(play.board()).ForRemove(m, [&](const Region& reg) {
-                    if (board_hash_.count(play.board().hash())) {
-                        exists = true;
-                    } else {
-                        board_hash_.insert(play.board().hash());
-
-                        rem_reg = reg;
-
-                        sq_loc_count = play.sq_state().AfterChangeSqLocs(reg);
-                        triple_diff_after = play.triple_state().Count(reg);
-                        double_diff_after = play.double_state().Count(reg);
-                        sq_removed = play.board().squares_removed();
-                    }
-                });
-            });
-            if (exists) return;
-
-            triple_diff_before = play.triple_state().Count(rem_reg);
-            double_diff_before = play.double_state().Count(rem_reg);
-
-            auto score = score_(sq_removed, sq_loc_count, 
-                                play.triple_state().triple_count() - triple_diff_before + triple_diff_after,
-                                play.double_state().double_count() - double_diff_before + double_diff_after);
-            derivs.emplace_back(play, m, score, - triple_diff_before + triple_diff_after,- double_diff_before + double_diff_after);
-        });
-    }
-
-    void AddSimpleDerivs(Play& play, vector<Derivative>& derivs) {
-        for (auto& m : play.board().moves()) {
-            if (play.sq_state().IsRemoveMove(m)) continue;
-
-            Region reg{m.pos, m.another()};
-
-            Count triple_diff_before = play.triple_state().Count(reg);
-            Count triple_diff_after;
-            Count double_diff_before = play.double_state().Count(reg);
-            Count double_diff_after;
-            Count sq_move_count;
-            Count sq_removed;
-
-            bool exists = false;
-            play.board().ForMove(m, [&]() {
-
-                if (board_hash_.count(play.board().hash())) {
-                    exists = true;
-                } else {
-                    board_hash_.insert(play.board().hash());
-
-                    sq_move_count = play.sq_state().AfterChangeSqLocs(reg);
-                    triple_diff_after = play.triple_state().Count(reg);
-                    double_diff_after = play.double_state().Count(reg);
-                    sq_removed = play.board().squares_removed();
-                }
-            });
-
-            if (exists) continue;
-
-            auto score = score_(sq_removed, sq_move_count, 
-                                play.triple_state().triple_count() - triple_diff_before + triple_diff_after,
-                                play.double_state().double_count() - double_diff_before + double_diff_after);
-            derivs.emplace_back(play, m, score, - triple_diff_before + triple_diff_after, - double_diff_before + double_diff_after);
-        }
-    }
-
-    void SelectDerivatives(vector<Derivative>& bs, Count sz) {
+    void SelectDerivatives(vector<Deriv>& bs, Count sz) {
         sz = min(sz, (Count)bs.size());
         nth_element(bs.begin(), bs.begin() + sz - 1, bs.end(), [&](const auto& i_0, const auto& i_1) {
             return i_0.score > i_1.score;
@@ -179,8 +80,6 @@ private:
         bs.resize(sz);
     }
 
-    Score score_;
-    LocalSqRm local_sq_rm_;
     unordered_set<Board::HashFunction::value> board_hash_;
 };
 
