@@ -4,8 +4,8 @@
 
 namespace bit {
 
-class Board : public :: Board {
-
+class Board : public ::Board {
+public:
     void Init(const Grid<DigitColor>& board, Count color_count, Index seed) override {
         ::Board::Init(board, color_count, seed);
 

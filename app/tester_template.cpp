@@ -10,7 +10,7 @@ using namespace ant;
 
 int main(int argc, const char * argv[])
 {
-    auto pr = RandomProblem(11, 4);
+    auto pr = RandomProblem(10, 4);
 
     SquareRemover solver;
     cerr << "started" << endl;

@@ -1,27 +1,36 @@
 #pragma once
 
+#include "state/state_triple.hpp"
+#include "state/state_double.hpp"
 #include "play/deriv.hpp"
 #include "play/play_v1.hpp"
 
 
-template<class Board>
+namespace play {
+
+template<class TBoard, class TLocalSqRm>
 class Play_v2 {
+    using BasePlay = Play_v1<TBoard, TLocalSqRm>;
+
 public:
 
-    struct Deriv : typename Play_v1::Deriv {
+    using Board = TBoard;
+    using LocalSqRm = TLocalSqRm;
+
+    struct Deriv : BasePlay::Deriv {
         Count triples;
         Count doubles;
 
         Deriv() {}
-        Deriv(typename Play_v1::Deriv& d, Count triples, Count doubles)
-            : typename Play_v1::Deriv(d), triples(tiples), doubles(doubles) {}
+        Deriv(const typename BasePlay::Deriv& d, Count triples, Count doubles)
+            : BasePlay::Deriv(d), triples(triples), doubles(doubles) {}
     };
 
     Play_v2() {}
     Play_v2(const Board& b) {
         Init(b);
     }
-    Play_v2(const Play& p) {
+    Play_v2(const Play_v2& p) {
         *this = p;
     }
 
@@ -38,8 +47,8 @@ public:
     void Init(const Board& b) {
         base_play_.Init(b);
 
-        triple_state_.Init(board_);
-        double_state_.Init(board_);
+        triple_state_.Init(base_play_.board());
+        double_state_.Init(base_play_.board());
     }
 
     void Apply(const Deriv& d) {
@@ -52,8 +61,8 @@ public:
     void ForEachDeriv(Func func) {
         derivs_.clear();
 
-        base_play_.ForEachDeriv([&](const typename Play_v1::Deriv& d_v1) {
-            derivs_.emplace({d_v1, triple_state_.Count(d_v1.ch_reg), double_state_.Count(d_v1.ch_reg)});
+        base_play_.ForEachDeriv([&](const typename BasePlay::Deriv& d_v1) {
+            derivs_.emplace_back(d_v1, triple_state_.Count(d_v1.ch_reg), double_state_.Count(d_v1.ch_reg));
         });
 
         for (auto& d : derivs_) {
@@ -65,18 +74,20 @@ public:
     }
 
     auto& board() {
-        return board_;
+        return base_play_.board();
     }
 
     auto& board() const {
-        return board_;
+        return base_play_.board();
     }
 
 private:
 
-    Play_v1 base_play_;
+    BasePlay base_play_;
 
     vector<Deriv> derivs_;
-    TripleState triple_state_;
-    DoubleState double_state_;
+    state::TripleState triple_state_;
+    state::DoubleState double_state_;
 };
+
+}

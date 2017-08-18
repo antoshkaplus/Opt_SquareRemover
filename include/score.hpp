@@ -28,8 +28,25 @@ public:
     Score_v2(double locs, double triples, double doubles)
         : factor_locs_(locs), factor_triples_(triples), factor_doubles_(doubles) {}
 
-    double operator()(int sq_removed, int locs, int triples, int doubles) {
-        return sq_removed + locs * factor_locs_ + triples * factor_triples_ + doubles * factor_doubles_;
+    template<class Deriv>
+    double operator()(const Deriv& d) {
+        return d.sq_removed + d.sq_move_count * factor_locs_ +  0.001 * d.triples * factor_triples_ + d.doubles * factor_doubles_;
     }
 
+};
+
+class Score_v3 {
+
+    double factor_locs_;
+    double factor_adj_;
+
+public:
+    Score_v3() {}
+    Score_v3(double locs, double adj)
+        : factor_locs_(locs), factor_adj_(adj) {}
+
+    template<class Deriv>
+    double operator()(const Deriv& d) {
+        return d.sq_removed + d.sq_move_count * factor_locs_ + factor_adj_ * sqrt(d.adj_amount);
+    }
 };

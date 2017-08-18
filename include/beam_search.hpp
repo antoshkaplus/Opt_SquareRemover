@@ -41,10 +41,13 @@ public:
         current.emplace_back(b);
 
         for (int i = 0; i < move_count; ++i) {
+            hashes_.clear();
 
             for_each(current.begin(), current.end(), [&](Play& p) {
                 p.ForEachDeriv([&](const PlayDeriv& d) {
+                    //if (hashes_.count(p.board().hash())) return;
                     derivs.emplace_back(p, d);
+                    //hashes_.insert(p.board().hash());
                 });
             });
 
@@ -86,5 +89,6 @@ private:
 
     Score score_;
     LocalSqRm local_sq_rm_;
+    unordered_set<typename Board::HashFunction::value> hashes_;
 };
 

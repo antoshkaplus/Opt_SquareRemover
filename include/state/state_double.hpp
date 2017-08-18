@@ -2,6 +2,9 @@
 
 #include "board.hpp"
 
+
+namespace state {
+
 class DoubleState {
 public:
     void Init(const ::Board &board) {
@@ -35,6 +38,10 @@ public:
         return double_count_;
     }
 
+    void set(ant::Count double_count) {
+        double_count_ = double_count;
+    }
+
 private:
 
     template<class Func>
@@ -54,3 +61,5 @@ private:
     const ::Board *board_;
     ant::Count double_count_ = 0;
 };
+
+}

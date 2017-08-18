@@ -94,6 +94,11 @@ target_link_libraries(beam square_remover)
 target_compile_definitions(beam PUBLIC -DSQR_REM_BEAM)
 set_target_properties(beam PROPERTIES COMPILE_FLAGS " -Wno-unused-variable -Wno-narrowing")
 
+add_executable(beam_tester app/methods.cpp app/tester_template.cpp)
+target_link_libraries(beam_tester square_remover)
+target_compile_definitions(beam_tester PUBLIC -DSQR_REM_BEAM)
+set_target_properties(beam_tester PROPERTIES COMPILE_FLAGS " -Wno-unused-variable -Wno-narrowing")
+
 
 # others
 add_executable(psyho others/psyho.cpp app/tester_template.cpp)

@@ -56,13 +56,24 @@ public:
 
     template<class Func>
     void ForEachDeriv(Func func) {
+//        for (auto& m : board_.moves()) {
+//            if (sq_state_.IsRemoveMove(m)) {
+//                AddSqLocDeriv(m, func);
+//            } else {
+//                AddSimpleDeriv(m, func);
+//            }
+//        }
+
 
         if (sq_state_.sq_moves_empty()) {
-            AddSimpleDerivs(func);
+            for (auto& m : board_.moves()) {
+                AddSimpleDeriv(m, func);
+            }
         } else {
-            AddSqLocDerivs(func);
+            sq_state_.ForEachSqMove([&](const Move& m) {
+                AddSqLocDeriv(m, func);
+            });
         }
-
     }
 
     auto& board() const {
@@ -72,36 +83,31 @@ public:
 private:
 
     template<class Func>
-    void AddSqLocDerivs(Func func) {
-        sq_state_.ForEachSqMove([&](const Move& m) {
+    void AddSqLocDeriv(const Move& m, Func func) {
+        board_.ForMove(m, [&]() {
+            // gonna be called with region described
+            local_sq_rm_.Init(board_).ForRemove(m, [&](const Region& reg) {
 
-            board_.ForMove(m, [&]() {
-                // gonna be called with region described
-                local_sq_rm_.Init(board_).ForRemove(m, [&](const Region& reg) {
+                auto sq_move_count = sq_state_.AfterChangeSqLocs(reg);
+                auto sq_removed = board_.squares_removed();
 
-                    auto sq_move_count = sq_state_.AfterChangeSqLocs(reg);
-                    auto sq_removed = board_.squares_removed();
-
-                    func({m, sq_removed, sq_move_count, reg, true});
-                });
+                func({m, sq_removed, sq_move_count, reg, true});
             });
         });
     }
 
     template<class Func>
-    void AddSimpleDerivs(Func func) {
-        for (auto& m : board_.moves()) {
+    void AddSimpleDeriv(const Move& m, Func func) {
+        Region reg{m.pos, m.another()};
 
-            Region reg{m.pos, m.another()};
+        board_.ForMove(m, [&]() {
 
-            board_.ForMove(m, [&]() {
+            auto sq_move_count = sq_state_.AfterChangeSqLocs(reg);
+            auto sq_removed = board_.squares_removed();
 
-                auto sq_move_count = sq_state_.AfterChangeSqLocs(reg);
-                auto sq_removed = board_.squares_removed();
+            func({m, sq_removed, sq_move_count, reg, false});
+        });
 
-                func({m, sq_removed, sq_move_count, reg, false});
-            });
-        }
     }
 
     digit::Locator locator_;

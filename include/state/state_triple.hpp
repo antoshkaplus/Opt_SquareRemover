@@ -2,6 +2,9 @@
 
 #include "board.hpp"
 
+
+namespace state {
+
 class TripleState {
 public:
     void Init(const ::Board& board) {
@@ -33,6 +36,10 @@ public:
 
     ant::Count triple_count() const {
         return triple_count_;
+    }
+
+    void set(ant::Count triple_count) {
+        triple_count_ = triple_count;
     }
 
 private:
@@ -105,3 +112,5 @@ private:
     const ::Board* board_;
     ant::Count triple_count_ = 0;
 };
+
+}

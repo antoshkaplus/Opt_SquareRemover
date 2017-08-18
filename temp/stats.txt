@@ -1,0 +1,12 @@
+Wrong:
+994200
+
+Beam no hash, simple moves only if nothing to remove, only sq moves considered
+928703
+
+// with new coefficients... again not much.
+// let's try now train for triples.
+926964
+
+Adding hash
+941201
