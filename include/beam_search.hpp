@@ -8,25 +8,25 @@
 
 #pragma once
 
-#include "state_sq.hpp"
-#include "state_triple.hpp"
-#include "state_double.hpp"
 #include "digit/board_hashed.hpp"
 #include "digit/locator.hpp"
 #include "play/play_v1.hpp"
 
 
-template<class LocalSqRm, class Play>
+// Score has to be able to accept deriv and give back result
+template<class Play, class Score>
 class BeamSearch {
 
-    using Board = digit::HashedBoard;
+    using Board = typename Play::Board;
     using PlayDeriv = typename Play::Deriv;
+    using LocalSqRm = typename Play::LocalSqRm;
 
     struct Deriv : PlayDeriv {
+        Deriv() {}
         Deriv(const Play& play, const PlayDeriv& deriv)
-            : PlayDeriv(deriv), play(play) {}
+            : PlayDeriv(deriv), play(&play) {}
 
-        Play* play;
+        const Play* play;
     };
 
 public:
@@ -41,9 +41,8 @@ public:
         current.emplace_back(b);
 
         for (int i = 0; i < move_count; ++i) {
-            board_hash_.clear();
 
-            for_each(current.begin(), current.end(), [&](const Play& p) {
+            for_each(current.begin(), current.end(), [&](Play& p) {
                 p.ForEachDeriv([&](const PlayDeriv& d) {
                     derivs.emplace_back(p, d);
                 });
@@ -70,16 +69,22 @@ public:
         return res.board();
     }
 
+    template<class S>
+    void set_score(S&& s) {
+        score_ = forward<S>(s);
+    }
+
 private:
 
     void SelectDerivatives(vector<Deriv>& bs, Count sz) {
         sz = min(sz, (Count)bs.size());
         nth_element(bs.begin(), bs.begin() + sz - 1, bs.end(), [&](const auto& i_0, const auto& i_1) {
-            return i_0.score > i_1.score;
+            return score_(i_0) > score_(i_1);
         });
         bs.resize(sz);
     }
 
-    unordered_set<Board::HashFunction::value> board_hash_;
+    Score score_;
+    LocalSqRm local_sq_rm_;
 };
 

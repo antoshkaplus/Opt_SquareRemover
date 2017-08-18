@@ -1,20 +1,29 @@
 #pragma once
 
-
-struct Deriv {
-    double score;
-    Move move;
-
-    Deriv() {}
-    Deriv(const Move& m, double s)
-        : score(s), move(m) {}
-
-};
+#include "digit/locator.hpp"
+#include "state/state_sq.hpp"
+#include "play/deriv.hpp"
 
 
-template<class Board, class LocalSqRm, class Score>
+namespace play {
+
+template<class TBoard, class TLocalSqRm>
 class Play_v1 {
-    using Deriv = ::Deriv;
+public:
+    using Board = TBoard;
+    using LocalSqRm = TLocalSqRm;
+
+    struct Deriv : play::Deriv {
+        Count sq_removed;
+        Count sq_move_count;
+        Region ch_reg;
+        bool is_remove_move;
+
+
+        Deriv() {}
+        Deriv(const Move& m, Count sq_removed, Count sq_move_count, Region ch_reg, bool is_remove_move)
+            : play::Deriv(m), sq_removed(sq_removed), sq_move_count(sq_move_count), is_remove_move(is_remove_move) {}
+    };
 
     Play_v1() {}
     Play_v1(const Board& b) {
@@ -56,10 +65,6 @@ class Play_v1 {
 
     }
 
-    void set_score(const Score& score) {
-        score_ = score;
-    }
-
     auto& board() const {
         return board_;
     }
@@ -74,11 +79,10 @@ private:
                 // gonna be called with region described
                 local_sq_rm_.Init(board_).ForRemove(m, [&](const Region& reg) {
 
-                    auto sq_loc_count = sq_state_.AfterChangeSqLocs(reg);
+                    auto sq_move_count = sq_state_.AfterChangeSqLocs(reg);
                     auto sq_removed = board_.squares_removed();
 
-                    auto score = score_(sq_removed, sq_loc_count);
-                    func({m, score});
+                    func({m, sq_removed, sq_move_count, reg, true});
                 });
             });
         });
@@ -95,16 +99,16 @@ private:
                 auto sq_move_count = sq_state_.AfterChangeSqLocs(reg);
                 auto sq_removed = board_.squares_removed();
 
-                auto score = score_(sq_removed, sq_move_count);
-                func({m, score});
+                func({m, sq_removed, sq_move_count, reg, false});
             });
         }
     }
 
     digit::Locator locator_;
     Board board_;
-    SqState<digit::Locator> sq_state_;
+    state::SqState<digit::Locator> sq_state_;
     LocalSqRm local_sq_rm_;
-    Score score_;
 };
+
+}
 

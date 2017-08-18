@@ -6,6 +6,7 @@
 #include "beam_search.hpp"
 #include "score.hpp"
 #include "factors.hpp"
+#include "play/play_v1.hpp"
 
 
 class SquareRemover {
@@ -61,11 +62,11 @@ std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> boar
 
 std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
     Grid<DigitColor> g = ToColorGrid(board);
-    digit::HashedBoard b;
+    digit::Board b;
     b.Init(g, colors, startingSeed);
-    BeamSearch<LocalSqRm_v2, Score_v1> beam;
+    BeamSearch<play::Play_v1<decltype(b), LocalSqRm_v2>, Score_v1> beam;
     Index group = ProblemGroup(colors, board.size());
-    Score_v1 s(kLocFactors[group], 0, 0);
+    Score_v1 s(kLocFactors[group]);
     b = beam.Remove(b, kMoveCount, 16 * 16 * 100 / (board.size()*board.size()));
 
     auto vec = b.move_history();

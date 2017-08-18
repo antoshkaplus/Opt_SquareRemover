@@ -1,8 +1,8 @@
 #pragma once
 
 #include "board.hpp"
+#include "location.hpp"
 
-template<class T, class Y> class BeamSearch;
 
 namespace digit {
 
@@ -107,9 +107,6 @@ public:
 
 private:
     const Board* board_;
-
-    template<class T, class Y>
-    friend class BeamSearch;
 };
 
 

@@ -30,13 +30,13 @@ const static vector<double> kDoubleFactors = {
 
 // only if you count sq and triples.
 const static vector<Count> kBeamWidth = {
-    3*450/4,
-    3*225/4,
-    3*100/4,
+    370,
+    200,
+    80,
     900/5,
     550/3,
     450/7,
     450*3,
-    225*2.8,
-    225*2.95
+    700,
+    700
 };

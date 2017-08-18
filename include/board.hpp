@@ -9,6 +9,7 @@
 #pragma once
 
 #include <functional>
+#include <iostream>
 
 #include "util.hpp"
 

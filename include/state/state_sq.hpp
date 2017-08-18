@@ -5,7 +5,7 @@
 #include "board.hpp"
 
 
-template<class T, class Y> class BeamSearch;
+namespace state {
 
 // need to keep track of Locations to easier know if move valid of not.
 // otherwise have to check sq in 4 locations
@@ -115,6 +115,6 @@ private:
     CountMap<Move, UnorderedMap> sq_moves_;
     std::unordered_map<Location, bool> sq_locs_;
     const Locator* locator_;
-
-    template<class T, class Y> friend class BeamSearch;
 };
+
+}
