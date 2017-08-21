@@ -34,19 +34,21 @@ int main(int argc, const char * argv[]) {
         out = &cout;
     } else {
         if (parser.exists("i")) {
+            cerr << "get input stream" << endl;
             input = parser.getValue("i");
             fin.open(input);
             in = &fin;
         } else {
-            cerr << "unable to find input file path";
+            cerr << "unable to find input file path" << endl;
             return 1;
         }
         if (parser.exists("o")) {
+            cerr << "get output stream" << endl;
             output = parser.getValue("o");
             fout.open(output);
             out = &fout;
         } else {
-            cerr << "unable to find output file path";
+            cerr << "unable to find output file path" << endl;
             return 1;
         }
     }
@@ -60,10 +62,6 @@ int main(int argc, const char * argv[]) {
     if (timed && timer.timeout()) {
         std::cerr << "timeout";
         return 0;
-    }
-    for (Index i = 0; i < v.size(); i+=3) {
-        --v[i];
-        --v[i+1];
     }
     WriteSolution(*out, v);
     return 0;

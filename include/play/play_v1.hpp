@@ -22,7 +22,7 @@ public:
 
         Deriv() {}
         Deriv(const Move& m, Count sq_removed, Count sq_move_count, Region ch_reg, bool is_remove_move)
-            : play::Deriv(m), sq_removed(sq_removed), sq_move_count(sq_move_count), is_remove_move(is_remove_move) {}
+            : play::Deriv(m), sq_removed(sq_removed), sq_move_count(sq_move_count), ch_reg(ch_reg), is_remove_move(is_remove_move) {}
     };
 
     Play_v1() {}

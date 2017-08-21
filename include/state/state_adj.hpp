@@ -23,8 +23,8 @@ public:
         auto cs = [&](Index r, Index c) {
             return board_->color(r, c);
         };
-
         reg = reg.diffed(-1, -1, 2, 2).intersection(board_->region().diffed(1, 1, -2, -2));
+
         reg.ForEach([&](const Position& p) {
             auto r = p.row;
             auto c = p.col;
@@ -42,12 +42,15 @@ public:
 
             res += count * count;
         });
-
         return res;
     }
 
     ant::Count adj_amount() const {
         return adj_amount_;
+    }
+
+    double score() const {
+        return sqrt(1.L * adj_amount_) / board_->region().size.cell_count();
     }
 
     void set(ant::Count adj_res) {

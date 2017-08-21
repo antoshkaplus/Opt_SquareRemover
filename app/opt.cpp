@@ -12,5 +12,5 @@ using namespace ant;
 int main(int argc, const char * argv[])
 {
     tbb::task_scheduler_init init;
-    beam::OptimizeLocsFactor();
+    beam::OptimizeTriplesFactorMesh();
 }

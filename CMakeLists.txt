@@ -101,7 +101,7 @@ set_target_properties(beam_tester PROPERTIES COMPILE_FLAGS " -Wno-unused-variabl
 
 
 # others
-add_executable(psyho others/psyho.cpp app/tester_template.cpp)
+add_executable(psyho others/psyho.cpp app/main_template.cpp)
 target_link_libraries(psyho square_remover)
 set_target_properties(psyho PROPERTIES COMPILE_FLAGS "-Wno-unused-variable -Wno-logical-op-parentheses -Wno-return-type")
 
@@ -113,7 +113,7 @@ add_executable(tanzaku_tester others/tanzaku.cpp app/tester_template.cpp)
 target_link_libraries(tanzaku_tester square_remover)
 set_target_properties(tanzaku_tester PROPERTIES COMPILE_FLAGS "-Wno-logical-op-parentheses -Wno-unused-const-variable")
 
-add_executable(tanzaku others/tanzaku.cpp app/tester_template.cpp)
+add_executable(tanzaku others/tanzaku.cpp app/main_template.cpp)
 target_link_libraries(tanzaku square_remover)
 set_target_properties(tanzaku PROPERTIES COMPILE_FLAGS "-Wno-logical-op-parentheses -Wno-unused-const-variable")
 
@@ -127,7 +127,7 @@ set_target_properties(wrong_tester PROPERTIES COMPILE_FLAGS "-Wno-logical-op-par
 
 
 find_library(TBB_LIB tbb)
-if (NOT GTEST_LIB)
+if (NOT TBB_LIB)
     message(FATAL_ERROR "tbb library not found")
 endif()
 

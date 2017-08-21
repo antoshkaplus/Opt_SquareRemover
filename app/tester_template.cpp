@@ -15,5 +15,6 @@ int main(int argc, const char * argv[])
     SquareRemover solver;
     cerr << "started" << endl;
     auto v = solver.playIt(pr.color_count, pr.board, pr.starting_seed);
+    Println(cout, v);
     cerr << "finished" << endl;
 }

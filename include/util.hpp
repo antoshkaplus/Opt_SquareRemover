@@ -1,7 +1,5 @@
 #pragma once
 
-#include "boost/iterator/zip_iterator.hpp"
-
 #include "ant/grid/grid.hpp"
 
 
@@ -193,8 +191,8 @@ inline vector<int> ToSolution(const vector<Move>& moves) {
     res.reserve(3*moves.size());
     static const map<Direction, int> ds = {{kDirUp, 0}, {kDirRight, 1}, {kDirDown, 2}, {kDirLeft, 3}};
     for (auto& m : moves) {
-        res.push_back(m.pos.row);
-        res.push_back(m.pos.col);
+        res.push_back(m.pos.row-1);
+        res.push_back(m.pos.col-1);
         res.push_back(ds.at(m.dir));
     }
     return res;

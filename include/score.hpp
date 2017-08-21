@@ -47,6 +47,6 @@ public:
 
     template<class Deriv>
     double operator()(const Deriv& d) {
-        return d.sq_removed + d.sq_move_count * factor_locs_ + factor_adj_ * sqrt(d.adj_amount);
+        return d.sq_removed + d.sq_move_count * factor_locs_ + factor_adj_ * 0.01 * sqrt(1.L * d.adj_amount);
     }
 };
