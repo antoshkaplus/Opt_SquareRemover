@@ -140,7 +140,6 @@ inline void OptimizeLocsFactorMesh_2() {
     for (auto i = 0; i < kProblemGroupCount; ++i) {
         Println(cout, factors[i], "mesh for group " + std::to_string(i));
     }
-
 }
 
 inline void OptimizeTriplesFactor() {
@@ -170,7 +169,7 @@ inline void OptimizeTriplesFactorMesh() {
             auto score_factory = [&](double triple_factor) {
                 return Score_v2(kLocFactors[group], triple_factor, 0);
             };
-            factors[group] = ComputeFactorMesh<play::Play_v2<digit::HashedBoard, LocalSqRm_v2>, Score_v2, decltype(score_factory)>(group, score_factory, "triples", 0., 0.01, 0.001);
+            factors[group] = ComputeFactorMesh<play::Play_v2<digit::HashedBoard, LocalSqRm_v2>, Score_v2, decltype(score_factory)>(group, score_factory, "triples", 0., 1., 0.1);
         } catch (exception ex) {
             std::cout << "group: " << group << " " << ex.what() << endl;
         }
@@ -224,6 +223,8 @@ inline void CheckTriplesFactor() {
         }
     }
 }
+
+
 
 //
 //inline void OptimizeDoublesFactor() {

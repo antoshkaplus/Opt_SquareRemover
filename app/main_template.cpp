@@ -57,6 +57,9 @@ int main(int argc, const char * argv[]) {
 
     Timer timer(30000);
     SquareRemover solver;
+
+    Println(cerr, problem.color_count, ", ", problem.board.size());
+
     auto v = solver.playIt(problem.color_count, problem.board, problem.starting_seed);
     cerr << "done" << endl;
     if (timed && timer.timeout()) {

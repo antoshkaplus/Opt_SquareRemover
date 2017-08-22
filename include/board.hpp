@@ -188,7 +188,7 @@ protected:
 
     Index seed_;
     Count color_count_;
-    Count squares_removed_;    
+    Count squares_removed_;
     // this one should not be stored here
     // ore may be computed everytime
     shared_ptr<vector<::Move>> moves_;

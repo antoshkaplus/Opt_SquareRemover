@@ -20,18 +20,10 @@ public:
         ForEachTriple(reg, [&]() { ++triple_count_; });
     }
 
-    void DecreaseChange(const Region& reg) {
-        ForEachTriple(reg, [&]() { --triple_count_; });
-    }
-
     ant::Count Count(const Region& reg) {
         auto res = 0;
         ForEachTriple(reg, [&]() { ++res; });
         return res;
-    }
-
-    void IncreaseBy(ant::Count count) {
-        triple_count_ += count;
     }
 
     ant::Count triple_count() const {
@@ -46,7 +38,7 @@ private:
 
     template<class Func>
     void ForEachTriple(const Region& reg, Func func) {
-        ForEachTriple_2x2(reg, [&]() { ++triple_count_; });
+        ForEachTriple_2x2(reg, [&]() { func(); });
 //        ForEachTriple_2x3(reg, [&]() { ++triple_count_; });
 //        ForEachTriple_3x2(reg, [&]() { ++triple_count_; });
     }

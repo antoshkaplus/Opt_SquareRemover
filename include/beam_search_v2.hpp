@@ -1,20 +1,13 @@
-//
-//  beam_search.hpp
-//  SquareRemover
-//
-//  Created by Anton Logunov on 11/9/15.
-//
-//
-
 #pragma once
 
 #include "digit/board_hashed.hpp"
 
 
 // Score has to be able to accept deriv and give back result
-template<class Play, class Score>
-class BeamSearch {
+template<class PlayFactory, class Score>
+class BeamSearch_v2 {
 
+    using Play = typename PlayFactory::Play;
     using Board = typename Play::Board;
     using PlayDeriv = typename Play::Deriv;
     using LocalSqRm = typename Play::LocalSqRm;
@@ -22,7 +15,7 @@ class BeamSearch {
     struct Deriv : PlayDeriv {
         Deriv() {}
         Deriv(const Play& play, const PlayDeriv& deriv)
-            : PlayDeriv(deriv), play(&play) {}
+        : PlayDeriv(deriv), play(&play) {}
 
         const Play* play;
     };
@@ -36,7 +29,7 @@ public:
         vector<Play> next;
         vector<Play> bs;
         vector<Deriv> derivs;
-        current.emplace_back(b);
+        current.emplace_back(play_factory_(b));
 
         for (int i = 0; i < move_count; ++i) {
             hashes_.clear();
@@ -75,6 +68,11 @@ public:
         score_ = forward<S>(s);
     }
 
+    template<class PF>
+    void set_play_factory(PF&& f) {
+        play_factory_ = forward<PF>(f);
+    }
+
 private:
 
     void SelectDerivatives(vector<Deriv>& bs, Count sz) {
@@ -85,6 +83,7 @@ private:
         bs.resize(sz);
     }
 
+    PlayFactory play_factory_;
     Score score_;
     LocalSqRm local_sq_rm_;
     unordered_set<typename Board::HashFunction::value> hashes_;

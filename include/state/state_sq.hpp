@@ -62,8 +62,16 @@ public:
         return sq_locs_.empty();
     }
 
+    Count sq_locs_count() const {
+        return sq_locs_.size();
+    }
+
     bool sq_moves_empty() const {
         return sq_moves_.empty();
+    }
+
+    Count sq_moves_count() const {
+        return sq_moves_.size();
     }
 
     template<class Func>

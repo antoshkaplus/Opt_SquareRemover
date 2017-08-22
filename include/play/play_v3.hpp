@@ -74,6 +74,10 @@ public:
         return base_play_.board();
     }
 
+    auto& base_play() {
+        return base_play_;
+    }
+
 private:
 
     BasePlay base_play_;

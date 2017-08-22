@@ -8,15 +8,12 @@ class LocalSqRm_v2 {
 
     // don't think pushing everything at once will help in any way
     void AddEliminateCandidate(const Region& rect) {
-        for (auto r = rect.row_begin(); r < rect.row_end(); ++r) {
-            for (auto c = rect.col_begin(); c < rect.col_end(); ++c) {
-                Position p(r, c);
-                if (board_->IsSquare(p)) {
-                    assert(board_->sq_region().hasInside(p));
-                    heap_.push(p);
-                }
+        rect.ForEach([&](const Position& p) {
+            if (board_->IsSquare(p)) {
+                assert(board_->sq_region().hasInside(p));
+                heap_.push(p);
             }
-        }
+        });
     }
 
     template<class BoardRemoveFunc>
@@ -32,7 +29,7 @@ class LocalSqRm_v2 {
             if (board_->IsSquare(p)) {
                 board_remove(p);
                 squares_.push_back(p);
-                rect = board_->region().intersection(Region(p.row - 1, p.col - 1, 3, 3));
+                rect = board_->sq_region().intersection(Region(p.row - 1, p.col - 1, 3, 3));
             } else {
                 rect = {};
             }
@@ -81,19 +78,34 @@ private:
         squares_.clear();
 
         Region rect{m.pos.shifted(-1,-1), m.another()};
-        eliminate(board_->region().intersection(rect), on_square_found);
+        eliminate(board_->sq_region().intersection(rect), on_square_found);
 
         // has to be present to make sense
         if (squares_.empty()) {
             return {m.pos, m.another()};
         } else {
-            auto comp = Position::TopLeftComparator();
 
-            auto minmax_sq = minmax_element(squares_.begin(), squares_.end(), comp);
-            auto topleft = min(*(minmax_sq.first), m.pos, comp);
-            auto botright = max(minmax_sq.second->shifted(1, 1), m.another(), comp);
+            auto another = m.another();
 
-            return Region(topleft, botright);
+            auto min_row = m.pos.row;
+            auto max_row = another.row;
+            auto min_col = m.pos.col;
+            auto max_col = another.col;
+
+            auto minmax_row = minmax_element(squares_.begin(), squares_.end(), [](auto& p_1, auto& p_2) {return p_1.row < p_2.row;});
+            auto minmax_col = minmax_element(squares_.begin(), squares_.end(), [](auto& p_1, auto& p_2) {return p_1.col < p_2.col;});
+
+            min_row = min(min_row, minmax_row.first->row);
+            max_row = max(max_row, minmax_row.second->row + 1);
+
+            min_col = min(min_col, minmax_col.first->col);
+            max_col = max(max_col, minmax_col.second->col + 1);
+
+            auto reg = Region(Position{min_row, min_col}, Position{max_row, max_col});
+
+            assert(reg.size.row >= 2 && reg.size.col >= 2);
+
+            return reg;
         }
     }
 

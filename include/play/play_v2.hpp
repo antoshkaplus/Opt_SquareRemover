@@ -23,7 +23,10 @@ public:
 
         Deriv() {}
         Deriv(const typename BasePlay::Deriv& d, Count triples, Count doubles)
-            : BasePlay::Deriv(d), triples(triples), doubles(doubles) {}
+            : BasePlay::Deriv(d), triples(triples), doubles(doubles) {
+
+            assert(triples >= 0);
+        }
     };
 
     Play_v2() {}
@@ -53,6 +56,7 @@ public:
 
     void Apply(const Deriv& d) {
         base_play_.Apply(d);
+
         triple_state_.set(d.triples);
         double_state_.set(d.doubles);
     }
@@ -69,6 +73,8 @@ public:
             d.triples += triple_state_.triple_count() - triple_state_.Count(d.ch_reg);
             d.doubles += double_state_.double_count() - double_state_.Count(d.ch_reg);
 
+            assert(d.triples >= 0);
+
             func(d);
         }
     }
@@ -79,6 +85,10 @@ public:
 
     auto& board() const {
         return base_play_.board();
+    }
+
+    auto& base_play() {
+        return base_play_;
     }
 
 private:

@@ -45,6 +45,7 @@ public:
         locator_.ResetBoard(board_);
         sq_state_ = play.sq_state_;
         sq_state_.ResetLocator(locator_);
+        min_sq_moves_ = play.min_sq_moves_;
         return *this;
     }
 
@@ -56,18 +57,14 @@ public:
 
     template<class Func>
     void ForEachDeriv(Func func) {
-//        for (auto& m : board_.moves()) {
-//            if (sq_state_.IsRemoveMove(m)) {
-//                AddSqLocDeriv(m, func);
-//            } else {
-//                AddSimpleDeriv(m, func);
-//            }
-//        }
 
-
-        if (sq_state_.sq_moves_empty()) {
+        if (sq_state_.sq_locs_count() < min_sq_moves_) {
             for (auto& m : board_.moves()) {
-                AddSimpleDeriv(m, func);
+                if (sq_state_.IsRemoveMove(m)) {
+                    AddSqLocDeriv(m, func);
+                } else {
+                    AddSimpleDeriv(m, func);
+                }
             }
         } else {
             sq_state_.ForEachSqMove([&](const Move& m) {
@@ -78,6 +75,10 @@ public:
 
     auto& board() const {
         return board_;
+    }
+
+    void set_min_sq_moves(Count sq_moves) {
+        min_sq_moves_ = sq_moves;
     }
 
 private:
@@ -110,6 +111,8 @@ private:
 
     }
 
+    // min sq moves, if less use all possible moves
+    Count min_sq_moves_ = 1;
     digit::Locator locator_;
     Board board_;
     state::SqState<digit::Locator> sq_state_;
