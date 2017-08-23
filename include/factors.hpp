@@ -11,7 +11,7 @@ const static vector<double> kLocFactors = {
 };
 
 const static vector<double> kTripleFactors = {
-    0, 0, 0, 0, 0, 0, 1, 1, 8
+    0, 0, 0, 0, 0, 0, 1, 0, 0
 };
 
 const static vector<double> kDoubleFactors = {

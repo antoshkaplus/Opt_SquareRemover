@@ -111,7 +111,7 @@ inline void OptimizeTriplesFactorMesh() {
     using PlayFactory = PlayFactory<play::Play_v2<digit::HashedBoard, LocalSqRm_v2>>;
 
     vector<vector<double>> factors(kProblemGroupCount);
-    tbb::parallel_for(kProblemGroupCount-3, kProblemGroupCount, 1, [&](Index group) {
+    tbb::parallel_for(0, kProblemGroupCount, 1, [&](Index group) {
 
         try {
             auto score_factory = [&](double triples_factor) {
@@ -119,10 +119,10 @@ inline void OptimizeTriplesFactorMesh() {
             };
 
             PlayFactory pf;
-            pf.min_sq_moves = 2;
+            pf.min_sq_moves = 3;
 
             factors[group] = ComputeFactorMesh<PlayFactory, Score_v2, decltype(score_factory)>(
-            group, pf, score_factory, "triples", 1, 10, 1);
+            group, pf, score_factory, "triples", 0, 100, 10);
         } catch (exception ex) {
             std::cout << "group: " << group << " " << ex.what() << endl;
         }

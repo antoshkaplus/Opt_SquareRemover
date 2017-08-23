@@ -30,7 +30,8 @@ public:
 
     template<class Deriv>
     double operator()(const Deriv& d) {
-        return d.sq_removed + d.sq_move_count * factor_locs_ +  0.001 * d.triples * factor_triples_ + d.doubles * factor_doubles_;
+        // as more sq_move_count reduce influence of secondary factor
+        return d.sq_removed + d.sq_move_count * factor_locs_ +  0.001 * d.triples * factor_triples_ / (d.sq_move_count +1) + d.doubles * factor_doubles_;
     }
 
 };
