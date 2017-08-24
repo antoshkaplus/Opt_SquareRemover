@@ -1,6 +1,9 @@
 // #define TIMERS
 // #define RELEASE
 
+#include <algorithm>
+#include <cstring>
+
 const bool REMOVE_REPETITIONS = true;
 const bool FINAL_STATS = false;
 const bool BEAM_STATS = false;
@@ -947,7 +950,7 @@ VI SquareRemover::playIt(int colors, VS _board, int seed) {
                     int y = rng.next(N);
                     int t = rng.next(1, 3);
 
-                    if (x == N - 1 && t == XMOVE || y == N - 1 && t == YMOVE) continue;
+                    if ((x == N - 1 && t == XMOVE) || (y == N - 1 && t == YMOVE)) continue;
                     if (board[x][y] == board[x+dx[t]][y+dy[t]]) continue;
 
                     simulate(t, x, y);

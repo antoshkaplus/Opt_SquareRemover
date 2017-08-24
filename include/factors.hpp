@@ -10,6 +10,10 @@ const static vector<double> kLocFactors = {
     0.3, 0.25, 0.25, 0.55, 0.75, 0.8, 1, 0.9, 0.98
 };
 
+const static vector<double> kLocRates = {
+    0.82, 0.85, 0.9, 0.82, 0.85, 0.84, 0.58, 0.75, 0.87
+};
+
 const static vector<double> kTripleFactors = {
     0, 0, 0, 0, 0, 0, 1, 0, 0
 };

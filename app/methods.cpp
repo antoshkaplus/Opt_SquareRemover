@@ -65,15 +65,17 @@ std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> boar
 #ifdef SQR_REM_BEAM_1
 
 std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
+    using PlayFactory = PlayFactory<play::Play_v1<digit::HashedBoard, LocalSqRm_v2>>;
+
     Grid<DigitColor> g = ToColorGrid(board);
     digit::HashedBoard b;
     b.Init(g, colors, startingSeed);
-    BeamSearch_v2<PlayFactory<play::Play_v1<digit::HashedBoard, LocalSqRm_v2>>, Score_v1> beam;
+    BeamSearch_v2<PlayFactory, Score_v1_1> beam;
     Index group = ProblemGroup(colors, board.size());
-    Score_v1 s(kLocFactors[group]);
+    Score_v1_1 s(kLocRates[group]);
     beam.set_score(s);
     PlayFactory f;
-    f.min_sq_moves = 2;
+    f.min_sq_moves = kMinSqMoves[group];
     beam.set_play_factory(f);
     b = beam.Remove(b, kMoveCount, 16 * 16 * 100 / (board.size()*board.size()));
 
@@ -112,12 +114,14 @@ std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> boar
 #ifdef SQR_REM_BEAM_3
 
 std::vector<int> SquareRemover::playIt(int colors, std::vector<std::string> board, int startingSeed) {
+    using PlayFactory = PlayFactory<play::Play_v3<digit::HashedBoard, LocalSqRm_v2>>;
+
     Grid<DigitColor> g = ToColorGrid(board);
     digit::HashedBoard b;
     b.Init(g, colors, startingSeed);
-    BeamSearch_v2<PlayFactory<play::Play_v1<digit::HashedBoard, LocalSqRm_v2>>, Score_v1> beam;
+    BeamSearch_v2<PlayFactory, Score_v3> beam;
     Index group = ProblemGroup(colors, board.size());
-    Score_v1 s(kLocFactors[group]);
+    Score_v3 s(kLocFactors[group]);
     beam.set_score(s);
     PlayFactory f;
     f.min_sq_moves = 2;

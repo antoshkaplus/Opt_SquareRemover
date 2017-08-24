@@ -17,6 +17,23 @@ public:
 
 };
 
+class Score_v1_1 {
+
+    double rate_;
+
+public:
+    Score_v1_1() {}
+    Score_v1_1(double rate)
+    : rate_(rate) {}
+
+    template<class Deriv>
+    double operator()(const Deriv& d) {
+        return d.sq_removed + (1. - pow(rate_, d.sq_move_count)) / (1. - rate_);
+    }
+
+};
+
+
 class Score_v2 {
 
     double factor_locs_;

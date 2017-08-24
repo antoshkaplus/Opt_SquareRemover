@@ -1,4 +1,3 @@
 Performance:
-  1) inline functions
-  2) reuse objects (vectors)
-  3) remove shared_ptr
+  1) reuse objects (vectors)
+  2) remove shared_ptr

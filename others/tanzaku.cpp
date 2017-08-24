@@ -589,7 +589,7 @@ int Solver2::move(int x, int y, int dx, int dy, int c, int lim) {
                     int c2 = state.board.get(px, py - dy);
                     int v1 = calcScore(ox, oy, c1);
                     int v2 = calcScore(ox, oy, c2);
-                    if (v1 > v2 || v1 == v2 && (rndm.nextInt() & 1) == 0) {
+                    if (v1 > v2 || (v1 == v2 && (rndm.nextInt() & 1) == 0)) {
                         state.swapCellTry(px, py, (dx + 1) & 3);
                         px -= dx;
                     }

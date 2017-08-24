@@ -106,6 +106,30 @@ inline void OptimizeLocsFactorMesh() {
     }
 }
 
+inline void OptimizeFactorMesh_v1_1() {
+    using PlayFactory = PlayFactory<play::Play_v1<digit::HashedBoard, LocalSqRm_v2>>;
+
+    vector<vector<double>> factors(kProblemGroupCount);
+    tbb::parallel_for(0, kProblemGroupCount, 1, [&](Index group) {
+
+        try {
+            auto score_factory = [](double locs_factor) {
+                return Score_v1_1(locs_factor);
+            };
+
+            PlayFactory pf;
+            pf.min_sq_moves = kMinSqMoves[group];
+
+            factors[group] = ComputeFactorMesh<PlayFactory, Score_v1_1, decltype(score_factory)>(
+            group, pf, score_factory, "locs", kLocRates[group]-0.1, kLocRates[group]+0.1, 0.01);
+        } catch (exception ex) {
+            std::cout << "group: " << group << " " << ex.what() << endl;
+        }
+    });
+    for (auto i = 0; i < kProblemGroupCount; ++i) {
+        Println(cout, factors[i], "mesh for group " + std::to_string(i));
+    }
+}
 
 inline void OptimizeTriplesFactorMesh() {
     using PlayFactory = PlayFactory<play::Play_v2<digit::HashedBoard, LocalSqRm_v2>>;
@@ -123,6 +147,32 @@ inline void OptimizeTriplesFactorMesh() {
 
             factors[group] = ComputeFactorMesh<PlayFactory, Score_v2, decltype(score_factory)>(
             group, pf, score_factory, "triples", 0, 100, 10);
+        } catch (exception ex) {
+            std::cout << "group: " << group << " " << ex.what() << endl;
+        }
+    });
+    for (auto i = 0; i < kProblemGroupCount; ++i) {
+        Println(cout, factors[i], "mesh for group " + std::to_string(i));
+    }
+}
+
+
+inline void OptimizeAdjFactorMesh() {
+    using PlayFactory = PlayFactory<play::Play_v3<digit::HashedBoard, LocalSqRm_v2>>;
+
+    vector<vector<double>> factors(kProblemGroupCount);
+    tbb::parallel_for(0, kProblemGroupCount, 1, [&](Index group) {
+
+        try {
+            auto score_factory = [&](double triples_factor) {
+                return Score_v3(kLocFactors[group], triples_factor);
+            };
+
+            PlayFactory pf;
+            pf.min_sq_moves = 3;
+
+            factors[group] = ComputeFactorMesh<PlayFactory, Score_v3, decltype(score_factory)>(
+            group, pf, score_factory, "triples", 0, 1, 0.1);
         } catch (exception ex) {
             std::cout << "group: " << group << " " << ex.what() << endl;
         }
